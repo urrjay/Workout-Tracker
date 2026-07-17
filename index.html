@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Hypertrophy Routine</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Splash Screen -->
+  <div id="splash-screen" class="screen active">
+    <h1>Hypertrophy Routine</h1>
+  </div>
+
+  <!-- Home Screen (Days of the Week) -->
+  <div id="home-screen" class="screen">
+    <h2>Select Day</h2>
+    <div class="button-grid">
+      <button class="large-btn" onclick="openDay('Monday')">Monday</button>
+      <button class="large-btn" onclick="openDay('Tuesday')">Tuesday</button>
+      <button class="large-btn" onclick="openDay('Wednesday')">Wednesday</button>
+      <button class="large-btn" onclick="openDay('Thursday')">Thursday</button>
+      <button class="large-btn" onclick="openDay('Friday')">Friday</button>
+    </div>
+  </div>
+
+  <!-- Day View Screen -->
+  <div id="day-screen" class="screen">
+    <button class="back-btn" onclick="goHome()">&#8592; Back</button>
+    <h2 id="current-day-title">Day</h2>
+    <h3 id="current-muscle-groups">Muscle Groups</h3>
+    
+    <div class="superset-grid">
+      <button class="small-btn" id="set-1" onclick="toggleSet(1)">Superset 1</button>
+      <button class="small-btn" id="set-2" onclick="toggleSet(2)">Superset 2</button>
+      <button class="small-btn" id="set-3" onclick="toggleSet(3)">Superset 3</button>
+      <button class="small-btn" id="set-4" onclick="toggleSet(4)">Superset 4</button>
+      <button class="small-btn" id="set-5" onclick="toggleSet(5)">Superset 5</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
