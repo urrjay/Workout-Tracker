@@ -4,1605 +4,667 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="theme-color" content="#FF6600" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>Athlete Workout Tracker</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-  
   <style>
-    * {
-      box-sizing: border-box; margin: 0; padding: 0;
-      user-select: none; -webkit-tap-highlight-color: transparent;
-    }
-
-    body, html {
-      width: 100%; height: 100%;
-      background: #ffffff;
-      color: #000;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    }
-
-    .screen {
-      display: none; width: 100vw; height: 100vh;
-      position: absolute; top: 0; left: 0;
-      background: #ffffff;
-      flex-direction: column;
-    }
-
-    .active { display: flex !important; }
-
-    /* --- SPLASH SCREEN --- */
-    #splash-screen {
-      align-items: center; justify-content: center;
-      text-align: center; padding: 20px; overflow: hidden;
-      background: linear-gradient(135deg, #FF6600, #FFB84D);
-    }
-    #splash-screen h1 { 
-      font-size: 3rem; font-weight: 900; letter-spacing: 2px; line-height: 1.1; 
-      text-transform: uppercase; color: #000;
-    }
-    .splash-subtitle { 
-      font-size: 1rem; font-weight: 700; color: #000;
-      letter-spacing: 3px; margin-top: 10px; text-transform: uppercase; 
-    }
-
-    /* --- HEADER/TOP SECTION --- */
-    .screen-header {
-      background: #000; color: #fff; padding: 20px 15px; width: 100%;
-      display: flex; justify-content: space-between; align-items: center;
-      flex-shrink: 0;
-    }
-
-    .screen-header-title {
-      font-size: 1.6rem; font-weight: 900; text-transform: uppercase; letter-spacing: 1px;
-    }
-
-    .header-nav {
-      display: flex; gap: 10px; align-items: center;
-    }
-
-    .header-btn {
-      background: #FF6600; color: #000; border: none; width: 40px; height: 40px;
-      border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.9rem;
-    }
-    .header-btn:active { background: #FFB84D; }
-
-    /* --- CONTENT AREA WITH ROUNDED SEPARATION --- */
-    .screen-content {
-      background: #ffffff; flex: 1; overflow-y: auto; padding: 0;
-      display: flex; flex-direction: column; align-items: center;
-      border-radius: 24px 24px 0 0;
-      margin-top: -12px;
-      padding-top: 20px;
-      padding-left: 15px;
-      padding-right: 15px;
-      padding-bottom: 20px;
-    }
-
-    /* --- SCHEDULE SCREEN --- */
-    #schedule-screen .screen-content {
-      gap: 0;
-    }
-
-    .days-container { 
-      display: flex; flex-direction: column; width: 100%; max-width: 380px; gap: 12px;
-    }
-    
-    .day-btn-wrapper {
-      display: flex; flex-direction: column; gap: 6px;
-    }
-
-    .day-btn {
-      background: #000; color: #fff; border: none; padding: 16px; 
-      font-size: 1.1rem; font-weight: 700; border-radius: 12px; 
-      text-transform: uppercase; cursor: pointer; text-align: left; 
-      transition: all 0.2s;
-    }
-    .day-btn:active { 
-      background: #333; transform: scale(0.98);
-    }
-
-    .day-muscles {
-      font-size: 0.65rem; color: #666; text-transform: uppercase; 
-      letter-spacing: 0.5px; padding-left: 16px; font-weight: 500;
-    }
-
-    .measurements-btn {
-      background: #000; color: #fff; border: none; padding: 14px; 
-      font-size: 1rem; font-weight: 700; border-radius: 12px; 
-      text-transform: uppercase; cursor: pointer; text-align: center; 
-      transition: all 0.2s; width: 100%; max-width: 380px; margin-top: 8px;
-    }
-    .measurements-btn:active { 
-      background: #333; transform: scale(0.98);
-    }
-
-    .admin-toggle {
-      position: fixed; bottom: 20px; right: 20px; width: 50px; height: 50px;
-      background: #FF6600; color: #000; border: none; 
-      border-radius: 50%; font-size: 1.2rem; cursor: pointer; 
-      box-shadow: 0 4px 12px rgba(255, 102, 0, 0.3); font-weight: bold; z-index: 9999;
-      transition: all 0.3s;
-    }
-    .admin-toggle:active { transform: scale(0.95); }
-
-    /* --- ROUTINE SCREEN --- */
-    .routine-header-section {
-      text-align: center; padding: 15px; width: 100%;
-    }
-
-    .routine-split-title { font-size: 0.95rem; font-weight: 600; color: #666; text-transform: uppercase; }
-
-    .supersets-list { 
-      display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 380px;
-      padding-bottom: 40px;
-    }
-    
-    /* --- SUPERSET STYLING --- */
-    .superset-section { display: flex; flex-direction: column; gap: 12px; }
-    
-    .superset-title-block { 
-      background: #000; color: #fff; padding: 12px; 
-      border-radius: 12px; display: flex; flex-direction: column; gap: 4px;
-    }
-    .superset-header { 
-      font-size: 1.1rem; font-weight: 900; color: #fff; text-transform: uppercase;
-    }
-    .superset-muscles {
-      font-size: 0.65rem; color: #FF9800; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;
-    }
-    .superset-details { font-size: 0.75rem; color: #aaa; font-style: italic; }
-
-    .set-block {
-      background: #000; color: #fff; border-radius: 12px; padding: 12px;
-      display: flex; flex-direction: column; gap: 10px;
-    }
-    
-    .set-label { 
-      font-size: 0.85rem; font-weight: bold; color: #fff; text-transform: uppercase; 
-      display: flex; align-items: baseline; justify-content: space-between; 
-    }
-
-    .exercise-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-    .exercise-thumb { 
-      width: 50px; height: 50px; border-radius: 8px; object-fit: cover; background: #FF6600;
-    }
-    .exercise-info { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }
-    .exercise-name { font-size: 0.8rem; font-weight: 700; color: #fff; line-height: 1.1; }
-
-    .exercise-inputs { display: flex; gap: 4px; align-items: center; }
-
-    /* Input styling */
-    .exercise-inputs input {
-      width: 50px; height: 36px; text-align: center; font-size: 0.9rem; font-weight: bold;
-      background: #1a1a1a; color: #FF6600; border: 1px solid #333; border-radius: 6px; outline: none;
-    }
-    .exercise-inputs input::placeholder { color: #666; font-size: 0.75rem; }
-    .exercise-inputs input:focus { border-color: #FF6600; }
-    
-    input[type="number"]::-webkit-inner-spin-button, 
-    input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-    
-    .input-group { display: flex; flex-direction: column; align-items: center; gap: 2px; }
-    .input-label { font-size: 0.6rem; color: #999; text-transform: uppercase; font-weight: bold; }
-
-    .burnout-details { font-size: 0.7rem; font-weight: normal; color: #FF9800; }
-    .completion-group { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-    .yes-no-btns { display: flex; gap: 5px; }
-    
-    .yn-btn {
-      background: #333; color: #fff; border: 1px solid #555;
-      padding: 6px 12px; border-radius: 6px; font-weight: bold;
-      font-size: 0.8rem; cursor: pointer; transition: all 0.2s ease;
-    }
-    .yn-btn.yes-selected { 
-      background: #FF6600; border-color: #FF6600; color: #000; 
-    }
-    .yn-btn.no-selected { 
-      background: #666; border-color: #666; color: #fff; 
-    }
-    
-    .raise-weight-note {
-      display: none; color: #FF9800; font-size: 0.75rem; font-weight: 800; 
-      text-align: right; margin-top: 3px;
-    }
-
-    .rest-btn {
-      background: #333; color: #fff; border: 1.5px solid #555;
-      padding: 8px; font-weight: 700; border-radius: 8px; text-transform: uppercase; width: 100%;
-      font-size: 0.75rem; cursor: pointer; transition: all 0.3s ease;
-    }
-    .rest-btn:active { 
-      background: #FF6600; color: #000; border-color: #FF6600; 
-    }
-    .rest-btn.active-timer { 
-      background: #FF6600; color: #000; border-color: #FF6600; 
-    }
-
-    /* Complete Button */
-    .complete-btn-container {
-      display: flex; justify-content: center; padding: 15px 0; margin-top: 10px; width: 100%;
-    }
-    .complete-btn {
-      background: #000; color: #fff; border: none; padding: 15px 35px; font-size: 1.1rem;
-      font-weight: 900; border-radius: 12px; text-transform: uppercase; cursor: pointer;
-    }
-    .complete-btn:active { 
-      background: #333;
-    }
-
-    /* --- MEASUREMENTS SCREEN --- */
-    .measurements-form {
-      background: #000; color: #fff; border-radius: 12px; padding: 15px; 
-      width: 100%; max-width: 380px; margin: 10px 0;
-    }
-
-    .form-group {
-      margin-bottom: 12px; display: flex; flex-direction: column; gap: 6px;
-    }
-
-    .form-label {
-      font-size: 0.9rem; font-weight: 600; color: #FF6600; text-transform: uppercase;
-    }
-
-    .form-input {
-      background: #1a1a1a; color: #FF6600; border: 1px solid #333; 
-      padding: 10px; border-radius: 8px; font-size: 0.95rem; font-weight: bold;
-    }
-    .form-input:focus { border-color: #FF6600; outline: none; }
-
-    .form-row {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
-    }
-
-    .chart-container {
-      background: #000; color: #fff; border-radius: 12px; padding: 15px;
-      margin: 15px 0; position: relative; height: 250px; width: 100%; max-width: 380px;
-    }
-
-    .chart-title {
-      font-size: 0.9rem; font-weight: 700; color: #FF6600; text-transform: uppercase; margin-bottom: 10px;
-    }
-
-    .measurements-buttons {
-      display: flex; gap: 10px; width: 100%; max-width: 380px;
-    }
-
-    .measurements-buttons button {
-      flex: 1; background: #000; color: #fff;
-      border: none; padding: 12px; border-radius: 10px; font-weight: 700;
-      font-size: 0.9rem; text-transform: uppercase; cursor: pointer;
-    }
-    .measurements-buttons button:active { background: #333; }
-
-    /* --- ADMIN PANEL --- */
-    .admin-content {
-      display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 380px;
-    }
-
-    .admin-tabs { 
-      display: flex; gap: 8px; overflow-x: auto; width: 100%;
-      background: #f5f5f5; padding: 8px; border-radius: 10px;
-    }
-    .admin-tab-btn {
-      background: transparent; color: #000; border: none; padding: 8px 12px; 
-      font-weight: 600; cursor: pointer; border-radius: 8px; font-size: 0.85rem;
-      white-space: nowrap; transition: all 0.2s;
-    }
-    .admin-tab-btn.active { background: #000; color: #fff; }
-
-    .admin-panel { display: none; }
-    .admin-panel.active { display: flex; flex-direction: column; gap: 15px; }
-
-    .selector-group { display: flex; flex-direction: column; gap: 8px; }
-    .selector-group label { font-weight: 600; color: #000; font-size: 0.9rem; text-transform: uppercase; }
-    .selector-group select {
-      background: #000; color: #fff; border: none; padding: 10px; 
-      border-radius: 8px; font-size: 0.9rem; font-weight: bold;
-    }
-
-    .superset-config { 
-      background: #f5f5f5; border: 2px solid #000; padding: 12px; 
-      border-radius: 12px;
-    }
-    .config-input {
-      background: #000; color: #fff; border: 1px solid #333; 
-      padding: 8px; border-radius: 6px; width: 100%; margin-bottom: 8px; 
-      font-size: 0.9rem; font-weight: bold;
-    }
-    .config-input::placeholder { color: #666; }
-
-    .selected-exercises { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
-    .exercise-tag {
-      background: #FF6600; color: #000; padding: 8px 12px; 
-      border-radius: 8px; display: flex; justify-content: space-between; align-items: center; 
-      font-weight: 600; font-size: 0.85rem;
-    }
-    .exercise-tag button { background: transparent; border: none; color: #000; cursor: pointer; font-weight: bold; }
-
-    .admin-btn {
-      background: #000; color: #fff; border: none; 
-      padding: 12px; border-radius: 8px; font-weight: 700; font-size: 0.9rem; 
-      text-transform: uppercase; cursor: pointer; transition: all 0.2s;
-    }
-    .admin-btn:active { background: #333; }
-
-    .admin-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
-    .admin-buttons button { flex: 1; min-width: 120px; }
-
-    @media (max-width: 480px) {
-      .form-row { grid-template-columns: 1fr; }
-    }
+    *{box-sizing:border-box;margin:0;padding:0;user-select:none}
+    body,html{width:100%;height:100%;background:#fff;color:#000;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+    .screen{display:none;width:100vw;height:100vh;position:absolute;top:0;left:0;background:#fff;flex-direction:column}
+    .active{display:flex!important}
+    #splash-screen{align-items:center;justify-content:center;background:linear-gradient(135deg,#FF6600,#FFB84D)}
+    #splash-screen h1{font-size:3rem;font-weight:900;text-transform:uppercase;color:#000}
+    .splash-subtitle{font-size:1rem;font-weight:700;color:#000;margin-top:10px}
+    .screen-header{background:#000;color:#fff;padding:20px 15px;display:flex;justify-content:space-between;align-items:center}
+    .screen-header-title{font-size:1.6rem;font-weight:900;text-transform:uppercase;flex:1;text-align:center}
+    .header-btn{background:#FF6600;color:#000;border:none;width:40px;height:40px;border-radius:8px;cursor:pointer;font-weight:bold}
+    .header-btn:active{background:#FFB84D}
+    .screen-content{background:#fff;flex:1;overflow-y:auto;display:flex;flex-direction:column;align-items:center;padding:20px 15px;border-top:3px solid #000}
+    .home-buttons{display:flex;flex-direction:column;width:100%;max-width:350px;gap:12px}
+    .home-btn{background:#000;color:#fff;border:none;padding:18px;font-size:1.1rem;font-weight:700;border-radius:12px;text-transform:uppercase;cursor:pointer}
+    .home-btn:active{background:#333}
+    .supersets-list{display:flex;flex-direction:column;gap:15px;width:100%;max-width:380px}
+    .superset-section{display:flex;flex-direction:column;gap:12px}
+    .superset-title-block{background:#000;color:#fff;padding:12px;border-radius:12px}
+    .superset-header{font-size:1.1rem;font-weight:900;color:#fff;text-transform:uppercase}
+    .set-block{background:#000;color:#fff;border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:10px}
+    .set-label{font-size:0.85rem;font-weight:bold;color:#fff;text-transform:uppercase}
+    .exercise-row{display:flex;align-items:center;gap:8px}
+    .exercise-thumb{width:50px;height:50px;border-radius:8px;object-fit:cover;background:#FF6600}
+    .exercise-name{font-size:0.8rem;font-weight:700;color:#fff;flex-grow:1}
+    .exercise-inputs{display:flex;gap:4px}
+    .exercise-inputs input{width:50px;height:36px;text-align:center;font-size:0.9rem;font-weight:bold;background:#1a1a1a;color:#FF6600;border:1px solid #333;border-radius:6px}
+    .input-label{font-size:0.6rem;color:#999;text-transform:uppercase;font-weight:bold}
+    .rest-btn{background:#333;color:#fff;border:1.5px solid #555;padding:8px;font-weight:700;border-radius:8px;width:100%;font-size:0.75rem;cursor:pointer;text-transform:uppercase}
+    .rest-btn.active-timer{background:#FF6600;color:#000;border-color:#FF6600}
+    .complete-btn{background:#000;color:#fff;border:none;padding:15px 35px;font-size:1.1rem;font-weight:900;border-radius:12px;text-transform:uppercase;cursor:pointer;margin-top:20px}
+    .measurements-section{background:#000;color:#fff;border-radius:12px;padding:15px;width:100%;max-width:380px;margin:10px 0}
+    .section-title{font-size:0.9rem;font-weight:700;color:#fff;text-transform:uppercase;margin-bottom:12px}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .form-group{display:flex;flex-direction:column;gap:6px}
+    .form-label{font-size:0.8rem;font-weight:600;color:#FF6600;text-transform:uppercase}
+    .form-input{background:#1a1a1a;color:#FF6600;border:1px solid #333;padding:10px;border-radius:8px;font-size:0.9rem;font-weight:bold;width:100%}
+    input[type="number"]{-moz-appearance:textfield}
+    input[type="number"]::-webkit-outer-spin-button,input[type="number"]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+    .admin-toggle{position:fixed;bottom:30px;right:30px;width:70px;height:70px;background:#FF6600;color:#000;border:none;border-radius:50%;font-size:1.8rem;cursor:pointer;box-shadow:0 4px 16px rgba(255,102,0,0.6);font-weight:bold;z-index:99999}
+    .admin-toggle:active{transform:scale(0.95)}
+    .admin-panel{display:none}
+    .admin-panel.active{display:flex;flex-direction:column;gap:15px}
+    .admin-tabs{display:flex;gap:8px;width:100%;background:#f5f5f5;padding:8px;border-radius:10px}
+    .admin-tab-btn{background:transparent;color:#000;border:none;padding:8px 12px;font-weight:600;cursor:pointer;border-radius:8px;font-size:0.85rem}
+    .admin-tab-btn.active{background:#000;color:#fff}
+    .selector-group{display:flex;flex-direction:column;gap:8px}
+    .selector-group label{font-weight:600;color:#000;font-size:0.9rem;text-transform:uppercase}
+    .selector-group select{background:#000;color:#fff;border:none;padding:10px;border-radius:8px;font-size:0.9rem;font-weight:bold;width:100%}
+    .superset-config{background:#f5f5f5;border:2px solid #000;padding:12px;border-radius:12px;margin-bottom:15px}
+    .config-input{background:#000;color:#fff;border:1px solid #333;padding:8px;border-radius:6px;width:100%;margin-bottom:8px;font-size:0.9rem;font-weight:bold}
+    .admin-btn{background:#000;color:#fff;border:none;padding:12px;border-radius:8px;font-weight:700;font-size:0.9rem;text-transform:uppercase;cursor:pointer;width:100%;margin-bottom:8px}
+    .admin-btn:active{background:#333}
+    .admin-buttons{display:flex;gap:10px;flex-wrap:wrap}
+    .admin-buttons button{flex:1;min-width:100px}
+    .orm-result{background:#FF6600;color:#000;padding:12px;border-radius:8px;font-weight:700;text-align:center;margin-top:10px;font-size:1.1rem}
+    .dashboard-stat{background:#f5f5f5;padding:15px;border-radius:12px;text-align:center;margin-bottom:10px}
+    .dashboard-stat-label{font-size:0.8rem;color:#666;text-transform:uppercase;font-weight:600}
+    .dashboard-stat-value{font-size:1.8rem;color:#FF6600;font-weight:900;margin-top:5px}
+    .youtube-link{color:#FF6600;text-decoration:underline;cursor:pointer;font-size:0.85rem;font-weight:600;display:inline-block;margin-top:8px}
+    .calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;width:100%;max-width:350px}
+    .calendar-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;background:#f5f5f5;border-radius:8px;font-size:0.75rem;font-weight:600;border:2px solid #ddd}
+    .calendar-day.completed{background:#FF6600;color:#fff;border-color:#FF6600}
+    .calendar-day.today{background:#FF6600;color:#fff;border-color:#FF6600;font-weight:900}
   </style>
 </head>
 <body>
 
-  <!-- SPLASH SCREEN -->
-  <div id="splash-screen" class="screen active">
-    <h1>WORKOUT<br />TRACKER</h1>
-    <div class="splash-subtitle">MUSCLES BY RJ</div>
+<div id="splash-screen" class="screen active">
+  <h1>WORKOUT<br />TRACKER</h1>
+  <div class="splash-subtitle">MUSCLES BY RJ</div>
+</div>
+
+<div id="home-screen" class="screen">
+  <div class="screen-header">
+    <div class="screen-header-title">HOME</div>
   </div>
+  <div class="screen-content">
+    <div class="home-buttons">
+      <button class="home-btn" onclick="startTodayWorkout()">WORKOUT</button>
+      <button class="home-btn" onclick="goToMeasurements()">MEASUREMENTS</button>
+      <button class="home-btn" onclick="goToCalculator()">1RM CALCULATOR</button>
+      <button class="home-btn" onclick="goToCalendar()">CALENDAR</button>
+      <button class="home-btn" onclick="goToDashboard()">PROGRESS</button>
+    </div>
+  </div>
+</div>
+
+<div id="routine-screen" class="screen">
+  <div class="screen-header">
+    <button class="header-btn" onclick="goHome()">←</button>
+    <div id="routine-day-title" class="screen-header-title"></div>
+    <button class="header-btn" onclick="toggleSwitchDay()" style="background:#FF9800">≡</button>
+  </div>
+  <div id="switch-day-menu" style="display:none;width:100%;background:#f5f5f5;padding:10px;text-align:center;position:absolute;top:60px;z-index:100">
+    <div style="font-size:0.8rem;font-weight:600;text-transform:uppercase;margin-bottom:8px">Switch Day:</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button class="day-btn" onclick="switchDay('Monday')" style="padding:10px;font-size:0.9rem">Monday</button>
+      <button class="day-btn" onclick="switchDay('Tuesday')" style="padding:10px;font-size:0.9rem">Tuesday</button>
+      <button class="day-btn" onclick="switchDay('Wednesday')" style="padding:10px;font-size:0.9rem">Wednesday</button>
+      <button class="day-btn" onclick="switchDay('Thursday')" style="padding:10px;font-size:0.9rem">Thursday</button>
+      <button class="day-btn" onclick="switchDay('Friday')" style="padding:10px;font-size:0.9rem">Friday</button>
+    </div>
+  </div>
+  <div class="screen-content">
+    <div id="supersets-list" class="supersets-list"></div>
+    <button class="complete-btn" onclick="completeWorkout()">COMPLETE</button>
+  </div>
+</div>
+
+<div id="measurements-screen" class="screen">
+  <div class="screen-header">
+    <button class="header-btn" onclick="goHome()">←</button>
+    <div class="screen-header-title">MEASUREMENTS</div>
+    <div style="width:40px"></div>
+  </div>
+  <div class="screen-content">
+    <div class="measurements-section">
+      <div class="section-title">BUILD (Measures Muscle Growth)</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Right Bicep (in)</label>
+          <input type="number" class="form-input" id="rb-bicep" placeholder="0.0" step="0.1">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Left Bicep (in)</label>
+          <input type="number" class="form-input" id="lb-bicep" placeholder="0.0" step="0.1">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Right Forearm (in)</label>
+          <input type="number" class="form-input" id="rf-forearm" placeholder="0.0" step="0.1">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Left Forearm (in)</label>
+          <input type="number" class="form-input" id="lf-forearm" placeholder="0.0" step="0.1">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Right Thigh (in)</label>
+          <input type="number" class="form-input" id="rt-thigh" placeholder="0.0" step="0.1">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Left Thigh (in)</label>
+          <input type="number" class="form-input" id="lt-thigh" placeholder="0.0" step="0.1">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Chest (in)</label>
+        <input type="number" class="form-input" id="chest" placeholder="0.0" step="0.1">
+      </div>
+    </div>
+
+    <div class="measurements-section">
+      <div class="section-title">CUT (Measures Fat Loss)</div>
+      <div class="form-group">
+        <label class="form-label">Weight (lbs)</label>
+        <input type="number" class="form-input" id="weight" placeholder="0.0" step="0.1">
+      </div>
+      <div style="background:#1a1a1a;padding:10px;border-radius:8px;margin-top:8px">
+        <div class="section-title" style="margin-bottom:10px;font-size:0.85rem">Fat Caliper (Optional)</div>
+        <a class="youtube-link" href="https://www.youtube.com/watch?v=a1A9m0wO17g" target="_blank">How to Measure Fat</a>
+        <div class="form-row" style="margin-top:10px">
+          <div class="form-group">
+            <label class="form-label">Chest (%)</label>
+            <input type="number" class="form-input" id="fc-chest" placeholder="0.0" step="0.1">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Abdominal (%)</label>
+            <input type="number" class="form-input" id="fc-abdomen" placeholder="0.0" step="0.1">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Thigh (%)</label>
+          <input type="number" class="form-input" id="fc-thigh" placeholder="0.0" step="0.1">
+        </div>
+      </div>
+      <button class="admin-btn" style="margin-top:15px" onclick="saveMeasurements()">SAVE</button>
+    </div>
+  </div>
+</div>
+
+<div id="calculator-screen" class="screen">
+  <div class="screen-header">
+    <button class="header-btn" onclick="goHome()">←</button>
+    <div class="screen-header-title">1RM CALCULATOR</div>
+    <div style="width:40px"></div>
+  </div>
+  <div class="screen-content">
+    <div class="measurements-section">
+      <div class="form-group">
+        <label class="form-label">Exercise Name</label>
+        <input type="text" class="form-input" id="orm-exercise" placeholder="e.g., Bench Press">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Weight (lbs)</label>
+          <input type="number" class="form-input" id="orm-weight" placeholder="0" step="0.5">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Reps</label>
+          <input type="number" class="form-input" id="orm-reps" placeholder="0" step="1" min="1" max="30">
+        </div>
+      </div>
+      <button class="admin-btn" onclick="calculateORM()">CALCULATE</button>
+      <div id="orm-result"></div>
+    </div>
+  </div>
+</div>
+
+<div id="calendar-screen" class="screen">
+  <div class="screen-header">
+    <button class="header-btn" onclick="goHome()">←</button>
+    <div class="screen-header-title">CALENDAR</div>
+    <div style="width:40px"></div>
+  </div>
+  <div class="screen-content">
+    <div id="calendar-month" style="font-size:1rem;font-weight:700;margin:15px 0;text-align:center"></div>
+    <div class="calendar-grid" id="calendar-grid"></div>
+  </div>
+</div>
+
+<div id="dashboard-screen" class="screen">
+  <div class="screen-header">
+    <button class="header-btn" onclick="goHome()">←</button>
+    <div class="screen-header-title">PROGRESS</div>
+    <div style="width:40px"></div>
+  </div>
+  <div class="screen-content">
+    <div id="dashboard-content" style="width:100%;max-width:380px"></div>
+  </div>
+</div>
+
+<div id="admin-screen" class="screen">
+  <div class="screen-header">
+    <div class="screen-header-title">ADMIN</div>
+    <button class="header-btn" onclick="closeAdmin()">✕</button>
+  </div>
+  <div class="screen-content">
+    <div style="width:100%;max-width:380px">
+      <div class="admin-tabs">
+        <button class="admin-tab-btn active" onclick="switchAdminTab('build')">Build</button>
+        <button class="admin-tab-btn" onclick="switchAdminTab('manage')">Manage</button>
+      </div>
+      <div id="admin-build" class="admin-panel active">
+        <div class="selector-group">
+          <label>Select Day:</label>
+          <select id="admin-day-select" onchange="loadDayForEdit()">
+            <option value="">--Choose--</option>
+            <option value="Monday">Monday</option>
+            <option value="Tuesday">Tuesday</option>
+            <option value="Wednesday">Wednesday</option>
+            <option value="Thursday">Thursday</option>
+            <option value="Friday">Friday</option>
+          </select>
+        </div>
+        <div id="supersets-config-container"></div>
+        <div class="admin-buttons">
+          <button class="admin-btn" onclick="addNewSuperset()">+Add Superset</button>
+          <button class="admin-btn" onclick="saveDayRoutine()">SAVE DAY</button>
+        </div>
+      </div>
+      <div id="admin-manage" class="admin-panel">
+        <button class="admin-btn" onclick="exportRoutines()">Export Routines</button>
+        <button class="admin-btn" onclick="importRoutines()">Import Routines</button>
+        <button class="admin-btn" onclick="clearAllData()">Clear All Data</button>
+        <input type="file" id="import-file" style="display:none" accept=".json"/>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button class="admin-toggle" onclick="toggleAdmin()">⚙️</button>
+
+<script>
+let currentDay = '';
+
+function getToday() {
+  const d = new Date();
+  const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+  return days[d.getDay()];
+}
+
+function getRoutines() {
+  return JSON.parse(localStorage.getItem('workout_routines') || '{}');
+}
+
+function saveRoutines(r) {
+  localStorage.setItem('workout_routines', JSON.stringify(r));
+}
+
+function goHome() {
+  showScreen('home-screen');
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function startTodayWorkout() {
+  const today = getToday();
+  if (today === 'Sunday' || today === 'Saturday') {
+    alert('No workout scheduled for ' + today);
+    goHome();
+    return;
+  }
+  openDay(today);
+}
+
+function openDay(day) {
+  document.getElementById('routine-day-title').innerText = day.toUpperCase();
+  currentDay = day;
+  showScreen('routine-screen');
+  renderRoutine(day);
+}
+
+function toggleSwitchDay() {
+  const m = document.getElementById('switch-day-menu');
+  m.style.display = m.style.display === 'none' ? 'block' : 'none';
+}
+
+function switchDay(day) {
+  document.getElementById('switch-day-menu').style.display = 'none';
+  openDay(day);
+}
+
+function renderRoutine(day) {
+  const c = document.getElementById('supersets-list');
+  c.innerHTML = '';
+  const r = getRoutines();
+  const dr = r[day];
   
-  <!-- SCHEDULE SCREEN -->
-  <div id="schedule-screen" class="screen">
-    <div class="screen-header">
-      <div class="screen-header-title">SCHEDULE</div>
-    </div>
-    <div class="screen-content">
-      <div class="days-container">
-        <div class="day-btn-wrapper">
-          <button class="day-btn" onclick="openDay('Monday')">MONDAY</button>
-          <div class="day-muscles" id="muscles-Monday"></div>
-        </div>
-        <div class="day-btn-wrapper">
-          <button class="day-btn" onclick="openDay('Tuesday')">TUESDAY</button>
-          <div class="day-muscles" id="muscles-Tuesday"></div>
-        </div>
-        <div class="day-btn-wrapper">
-          <button class="day-btn" onclick="openDay('Wednesday')">WEDNESDAY</button>
-          <div class="day-muscles" id="muscles-Wednesday"></div>
-        </div>
-        <div class="day-btn-wrapper">
-          <button class="day-btn" onclick="openDay('Thursday')">THURSDAY</button>
-          <div class="day-muscles" id="muscles-Thursday"></div>
-        </div>
-        <div class="day-btn-wrapper">
-          <button class="day-btn" onclick="openDay('Friday')">FRIDAY</button>
-          <div class="day-muscles" id="muscles-Friday"></div>
-        </div>
-      </div>
-      <button class="measurements-btn" onclick="openMeasurements()">MEASUREMENTS & PROGRESS</button>
-    </div>
-  </div>
+  if (!dr || !dr.supersets || dr.supersets.length === 0) {
+    c.innerHTML = '<div style="text-align:center;margin-top:30px;color:#666">No routine</div>';
+    return;
+  }
 
-  <!-- ROUTINE SCREEN -->
-  <div id="routine-screen" class="screen">
-    <div class="screen-header">
-      <button class="header-btn" onclick="goBackToSchedule()">←</button>
-      <div id="routine-day-title" class="screen-header-title"></div>
-      <div style="width: 40px;"></div>
-    </div>
-    <div class="screen-content">
-      <div class="routine-header-section">
-        <div id="routine-split-title" class="routine-split-title"></div>
-      </div>
-      <div id="supersets-list" class="supersets-list"></div>
-    </div>
-  </div>
-
-  <!-- MEASUREMENTS SCREEN -->
-  <div id="measurements-screen" class="screen">
-    <div class="screen-header">
-      <button class="header-btn" onclick="goBackToSchedule()">←</button>
-      <div class="screen-header-title">MEASUREMENTS</div>
-      <div style="width: 40px;"></div>
-    </div>
-    <div class="screen-content">
-      <div class="measurements-form">
-        <h3 style="color: #FF6600; margin-bottom: 12px; text-transform: uppercase;">CURRENT MONTH</h3>
-        
-        <div class="form-group">
-          <label class="form-label">Body Weight (lbs)</label>
-          <input type="number" class="form-input" id="weight-input" placeholder="Enter weight" step="0.1">
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Bicep (in)</label>
-            <input type="number" class="form-input" id="bicep-input" placeholder="L + R" step="0.1">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Chest (in)</label>
-            <input type="number" class="form-input" id="chest-input" placeholder="measurement" step="0.1">
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Waist (in)</label>
-            <input type="number" class="form-input" id="waist-input" placeholder="optional" step="0.1">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Thigh (in)</label>
-            <input type="number" class="form-input" id="thigh-input" placeholder="optional" step="0.1">
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">3-Point Fat Caliper (%)</label>
-          <input type="number" class="form-input" id="bodyfat-input" placeholder="optional" step="0.1">
-        </div>
-
-        <div class="measurements-buttons">
-          <button onclick="saveMeasurement()">SAVE</button>
-        </div>
-      </div>
-
-      <div id="charts-container"></div>
-    </div>
-  </div>
-
-  <!-- ADMIN SCREEN -->
-  <div id="admin-screen" class="screen">
-    <div class="screen-header">
-      <div class="screen-header-title">ADMIN</div>
-      <button class="header-btn" onclick="closeAdmin()">✕</button>
-    </div>
-    <div class="screen-content">
-      <div class="admin-content">
-        <div class="admin-tabs">
-          <button class="admin-tab-btn active" onclick="switchAdminTab('build')">Build Routine</button>
-          <button class="admin-tab-btn" onclick="switchAdminTab('manage')">Manage Data</button>
-        </div>
-
-        <!-- BUILD ROUTINE TAB -->
-        <div id="admin-build" class="admin-panel active">
-          <div class="selector-group">
-            <label>Select Day to Edit:</label>
-            <select id="admin-day-select" onchange="loadDayForEdit()">
-              <option value="">-- Choose Day --</option>
-              <option value="Monday">Monday</option>
-              <option value="Tuesday">Tuesday</option>
-              <option value="Wednesday">Wednesday</option>
-              <option value="Thursday">Thursday</option>
-              <option value="Friday">Friday</option>
-            </select>
-          </div>
-
-          <div id="supersets-config-container"></div>
-
-          <div class="admin-buttons">
-            <button class="admin-btn" onclick="addNewSuperset()">+ Add Superset</button>
-            <button class="admin-btn" onclick="saveDayRoutine()">SAVE DAY</button>
-          </div>
-        </div>
-
-        <!-- MANAGE DATA TAB -->
-        <div id="admin-manage" class="admin-panel">
-          <h3 style="color: #000; font-size: 1rem; text-transform: uppercase; margin-top: 10px;">Backup & Import</h3>
-          <button class="admin-btn" onclick="exportRoutines()">Export Routines</button>
-          <button class="admin-btn" onclick="importRoutines()">Import Routines</button>
-          <button class="admin-btn" onclick="clearAllData()">Clear All Data</button>
-
-          <h3 style="color: #000; font-size: 1rem; text-transform: uppercase; margin-top: 15px;">Athlete PRs</h3>
-          <button class="admin-btn" onclick="exportPRs()">Export PRs</button>
-          <button class="admin-btn" onclick="clearPRs()">Clear All PRs</button>
-
-          <h3 style="color: #000; font-size: 1rem; text-transform: uppercase; margin-top: 15px;">Measurements</h3>
-          <button class="admin-btn" onclick="exportMeasurements()">Export Measurements</button>
-          <button class="admin-btn" onclick="clearMeasurements()">Clear Measurements</button>
-
-          <h3 style="color: #000; font-size: 1rem; text-transform: uppercase; margin-top: 15px;">Current Week</h3>
-          <button class="admin-btn" onclick="exportCurrentInputs()">Export Inputs</button>
-          <button class="admin-btn" onclick="clearCurrentInputs()">Clear Inputs</button>
-
-          <input type="file" id="import-file" style="display: none;" accept=".json" />
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <button class="admin-toggle" onclick="toggleAdmin()">⚙️</button>
-
-  <script>
-    // ========== EXERCISE DATABASE WITH MUSCLE GROUPS & ExRx URLS ==========
-    const EXERCISE_DATABASE = {
-      "Chest": {
-        "Barbell": [
-          { name: "Barbell Bench Press", url: "https://exrx.net/AnimatedEx/Chest/BBBench.gif", muscles: ["Chest"] },
-          { name: "Barbell Incline Bench Press", url: "https://exrx.net/AnimatedEx/Chest/BBInclineBench.gif", muscles: ["Chest"] },
-          { name: "Barbell Decline Bench Press", url: "https://exrx.net/AnimatedEx/Chest/BBDeclineBench.gif", muscles: ["Chest"] },
-          { name: "Close Grip Bench Press", url: "https://exrx.net/AnimatedEx/Chest/BBCloseGrip.gif", muscles: ["Chest", "Triceps"] },
-          { name: "Barbell Floor Press", url: "https://exrx.net/AnimatedEx/Chest/BBFloorPress.gif", muscles: ["Chest"] }
-        ],
-        "Dumbbell": [
-          { name: "Dumbbell Bench Press", url: "https://exrx.net/AnimatedEx/Chest/DBBench.gif", muscles: ["Chest"] },
-          { name: "Dumbbell Incline Bench Press", url: "https://exrx.net/AnimatedEx/Chest/DBInclineBench.gif", muscles: ["Chest"] },
-          { name: "Dumbbell Decline Bench Press", url: "https://exrx.net/AnimatedEx/Chest/DBDeclineBench.gif", muscles: ["Chest"] },
-          { name: "Dumbbell Fly", url: "https://exrx.net/AnimatedEx/Chest/DBFly.gif", muscles: ["Chest"] },
-          { name: "Dumbbell Pullover", url: "https://exrx.net/AnimatedEx/Chest/DBPullover.gif", muscles: ["Chest"] }
-        ],
-        "Bands": [
-          { name: "Resistance Band Chest Press", url: "https://exrx.net/AnimatedEx/Chest/BandChestPress.gif", muscles: ["Chest"] },
-          { name: "Resistance Band Fly", url: "https://exrx.net/AnimatedEx/Chest/BandFly.gif", muscles: ["Chest"] },
-          { name: "Banded Push-ups", url: "https://exrx.net/AnimatedEx/Chest/BandPushup.gif", muscles: ["Chest"] },
-          { name: "Resistance Band Incline Press", url: "https://exrx.net/AnimatedEx/Chest/BandInclinePress.gif", muscles: ["Chest"] },
-          { name: "Chest Expander Exercise", url: "https://exrx.net/AnimatedEx/Chest/BandExpander.gif", muscles: ["Chest"] }
-        ],
-        "Body Weight": [
-          { name: "Push-ups", url: "https://exrx.net/AnimatedEx/Chest/Pushup.gif", muscles: ["Chest", "Triceps"] },
-          { name: "Incline Push-ups", url: "https://exrx.net/AnimatedEx/Chest/InclinePushup.gif", muscles: ["Chest"] },
-          { name: "Decline Push-ups", url: "https://exrx.net/AnimatedEx/Chest/DeclinePushup.gif", muscles: ["Chest"] },
-          { name: "Diamond Push-ups", url: "https://exrx.net/AnimatedEx/Chest/DiamondPushup.gif", muscles: ["Chest", "Triceps"] },
-          { name: "Wide Grip Push-ups", url: "https://exrx.net/AnimatedEx/Chest/WidePushup.gif", muscles: ["Chest"] }
-        ],
-        "Plates": [
-          { name: "Plate Chest Press", url: "https://exrx.net/AnimatedEx/Chest/PlatePress.gif", muscles: ["Chest"] },
-          { name: "Plate Squeeze", url: "https://exrx.net/AnimatedEx/Chest/PlateSqueeze.gif", muscles: ["Chest"] },
-          { name: "Plate Crush", url: "https://exrx.net/AnimatedEx/Chest/PlateCrush.gif", muscles: ["Chest"] },
-          { name: "Plate Fly", url: "https://exrx.net/AnimatedEx/Chest/PlateFly.gif", muscles: ["Chest"] },
-          { name: "Plate Raise", url: "https://exrx.net/AnimatedEx/Chest/PlateRaise.gif", muscles: ["Chest"] }
-        ],
-        "Bench": [
-          { name: "Machine Chest Press", url: "https://exrx.net/AnimatedEx/Chest/MachineChestPress.gif", muscles: ["Chest"] },
-          { name: "Smith Machine Bench Press", url: "https://exrx.net/AnimatedEx/Chest/SmithBench.gif", muscles: ["Chest"] },
-          { name: "Bench Dips", url: "https://exrx.net/AnimatedEx/Chest/BenchDips.gif", muscles: ["Chest", "Triceps"] },
-          { name: "Chest Press Machine", url: "https://exrx.net/AnimatedEx/Chest/MachinePress.gif", muscles: ["Chest"] },
-          { name: "Pec Deck", url: "https://exrx.net/AnimatedEx/Chest/PecDeck.gif", muscles: ["Chest"] }
-        ],
-        "Machine": [
-          { name: "Machine Chest Fly", url: "https://exrx.net/AnimatedEx/Chest/MachineFly.gif", muscles: ["Chest"] },
-          { name: "Cable Fly", url: "https://exrx.net/AnimatedEx/Chest/CableFly.gif", muscles: ["Chest"] },
-          { name: "Cable Lower Chest Raise", url: "https://exrx.net/AnimatedEx/Chest/CableLowerChest.gif", muscles: ["Chest"] },
-          { name: "Cable Upper Chest Raise", url: "https://exrx.net/AnimatedEx/Chest/CableUpperChest.gif", muscles: ["Chest"] },
-          { name: "Hammer Strength Machine", url: "https://exrx.net/AnimatedEx/Chest/HammerStrength.gif", muscles: ["Chest"] }
-        ]
-      },
-      "Back": {
-        "Barbell": [
-          { name: "Barbell Bent-Over Row", url: "https://exrx.net/AnimatedEx/LatissimusDorsi/BBBentOverRow.gif", muscles: ["Back"] },
-          { name: "Barbell Deadlift", url: "https://exrx.net/AnimatedEx/Back/BBDeadlift.gif", muscles: ["Back"] },
-          { name: "T-Bar Row", url: "https://exrx.net/AnimatedEx/Back/TBarRow.gif", muscles: ["Back"] },
-          { name: "Pendulum Row", url: "https://exrx.net/AnimatedEx/Back/PendulumRow.gif", muscles: ["Back"] },
-          { name: "Barbell Seal Row", url: "https://exrx.net/AnimatedEx/Back/BBSealRow.gif", muscles: ["Back"] }
-        ],
-        "Dumbbell": [
-          { name: "Dumbbell One-Arm Row", url: "https://exrx.net/AnimatedEx/LatissimusDorsi/DBOneArmRow.gif", muscles: ["Back"] },
-          { name: "Dumbbell Bent-Over Row", url: "https://exrx.net/AnimatedEx/LatissimusDorsi/DBBentOverRow.gif", muscles: ["Back"] },
-          { name: "Dumbbell Single-Arm Deadlift", url: "https://exrx.net/AnimatedEx/Back/DBSingleDeadlift.gif", muscles: ["Back"] },
-          { name: "Dumbbell Pullovers", url: "https://exrx.net/AnimatedEx/LatissimusDorsi/DBPullover.gif", muscles: ["Back"] },
-          { name: "Dumbbell Shrugs", url: "https://exrx.net/AnimatedEx/Traps/DBShrug.gif", muscles: ["Back"] }
-        ],
-        "Bands": [
-          { name: "Resistance Band Row", url: "https://exrx.net/AnimatedEx/Back/BandRow.gif", muscles: ["Back"] },
-          { name: "Banded Pull-ups", url: "https://exrx.net/AnimatedEx/LatissimusDorsi/BandPullup.gif", muscles: ["Back"] },
-          { name: "Resistance Band Deadlift", url: "https://exrx.net/AnimatedEx/Back/BandDeadlift.gif", muscles: ["Back"] },
-          { name: "Banded Lat Pulldown", url: "https://exrx.net/AnimatedEx/LatissimusDorsi/BandLatPulldown.gif", muscles: ["Back"] },
-          { name: "Chest Supported Band Row", url: "https://exrx.net/AnimatedEx/Back/BandChestRow.gif", muscles: ["Back"] }
-        ],
-        "Body Weight": [
-          { name: "Pull-ups", url: "https://exrx.net/AnimatedEx/LatissimusDorsi/Pullup.gif", muscles: ["Back", "Biceps"] },
-          { name: "Chin-ups", url: "https://exrx.net/AnimatedEx/LatissimusDorsi/Chinup.gif", muscles: ["Back", "Biceps"] },
-          { name: "Wide Grip Pull-ups", url: "https://exrx.net/AnimatedEx/LatissimusDorsi/WidePullup.gif", muscles: ["Back"] },
-          { name: "Close Grip Pull-ups", url: "https://exrx.net/AnimatedEx/LatissimusDorsi/ClosePullup.gif", muscles: ["Back", "Biceps"] },
-          { name: "Inverted Rows", url: "https://exrx.net/AnimatedEx/LatissimusDorsi/InvertedRow.gif", muscles: ["Back", "Biceps"] }
-        ],
-        "Plates": [
-          { name: "Plate Loaded Row", url: "https://exrx.net/AnimatedEx/Back/PlateRow.gif", muscles: ["Back"] },
-          { name: "Plate Loaded Pulley", url: "https://exrx.net/AnimatedEx/Back/PlatePulley.gif", muscles: ["Back"] },
-          { name: "Plate Carry", url: "https://exrx.net/AnimatedEx/Back/PlateCarry.gif", muscles: ["Back"] },
-          { name: "Plate Shrug", url: "https://exrx.net/AnimatedEx/Traps/PlateShrug.gif", muscles: ["Back"] },
-          { name: "Plate Pull-over", url: "https://exrx.net/AnimatedEx/Back/PlatePullover.gif", muscles: ["Back"] }
-        ],
-        "Bench": [
-          { name: "Machine Row", url: "https://exrx.net/AnimatedEx/Back/MachineRow.gif", muscles: ["Back"] },
-          { name: "Seated Cable Row", url: "https://exrx.net/AnimatedEx/LatissimusDorsi/CableSeatedRow.gif", muscles: ["Back"] },
-          { name: "Chest Supported Row", url: "https://exrx.net/AnimatedEx/Back/ChestSupportedRow.gif", muscles: ["Back"] },
-          { name: "Machine Pulley", url: "https://exrx.net/AnimatedEx/Back/MachinePulley.gif", muscles: ["Back"] },
-          { name: "Bench Row Machine", url: "https://exrx.net/AnimatedEx/Back/BenchRowMachine.gif", muscles: ["Back"] }
-        ],
-        "Machine": [
-          { name: "Lat Pulldown Machine", url: "https://exrx.net/AnimatedEx/LatissimusDorsi/LatPulldown.gif", muscles: ["Back"] },
-          { name: "Wide Grip Lat Pulldown", url: "https://exrx.net/AnimatedEx/LatissimusDorsi/WideLatPulldown.gif", muscles: ["Back"] },
-          { name: "Underhand Cable Pulldown", url: "https://exrx.net/AnimatedEx/LatissimusDorsi/UnderhandPulldown.gif", muscles: ["Back", "Biceps"] },
-          { name: "Straight Arm Cable Pulldown", url: "https://exrx.net/AnimatedEx/LatissimusDorsi/StraightArmPulldown.gif", muscles: ["Back"] },
-          { name: "Back Extension Machine", url: "https://exrx.net/AnimatedEx/Back/BackExtensionMachine.gif", muscles: ["Back"] }
-        ]
-      },
-      "Biceps": {
-        "Barbell": [
-          { name: "Barbell Curl", url: "https://exrx.net/AnimatedEx/Biceps/BBCurl.gif", muscles: ["Biceps"] },
-          { name: "EZ Bar Curl", url: "https://exrx.net/AnimatedEx/Biceps/EZBarCurl.gif", muscles: ["Biceps"] },
-          { name: "Barbell Reverse Curl", url: "https://exrx.net/AnimatedEx/Biceps/BBReverseCurl.gif", muscles: ["Biceps"] },
-          { name: "Olympic Bar Curl", url: "https://exrx.net/AnimatedEx/Biceps/OlympicCurl.gif", muscles: ["Biceps"] },
-          { name: "Smith Machine Curl", url: "https://exrx.net/AnimatedEx/Biceps/SmithCurl.gif", muscles: ["Biceps"] }
-        ],
-        "Dumbbell": [
-          { name: "Dumbbell Alternating Bicep Curl", url: "https://exrx.net/AnimatedEx/Biceps/DBAltCurl.gif", muscles: ["Biceps"] },
-          { name: "Dumbbell Incline Curl", url: "https://exrx.net/AnimatedEx/Biceps/DBInclineCurl.gif", muscles: ["Biceps"] },
-          { name: "Dumbbell Concentration Curl", url: "https://exrx.net/AnimatedEx/Biceps/DBConcCurl.gif", muscles: ["Biceps"] },
-          { name: "Dumbbell Hammer Curl", url: "https://exrx.net/AnimatedEx/Biceps/DBHammerCurl.gif", muscles: ["Biceps"] },
-          { name: "Dumbbell Zottoman Curl", url: "https://exrx.net/AnimatedEx/Biceps/DBZottoman.gif", muscles: ["Biceps"] }
-        ],
-        "Bands": [
-          { name: "Resistance Band Curl", url: "https://exrx.net/AnimatedEx/Biceps/BandCurl.gif", muscles: ["Biceps"] },
-          { name: "Band Alternating Curl", url: "https://exrx.net/AnimatedEx/Biceps/BandAltCurl.gif", muscles: ["Biceps"] },
-          { name: "Band Hammer Curl", url: "https://exrx.net/AnimatedEx/Biceps/BandHammerCurl.gif", muscles: ["Biceps"] },
-          { name: "Band Concentration Curl", url: "https://exrx.net/AnimatedEx/Biceps/BandConcCurl.gif", muscles: ["Biceps"] },
-          { name: "Band Reverse Curl", url: "https://exrx.net/AnimatedEx/Biceps/BandReverseCurl.gif", muscles: ["Biceps"] }
-        ],
-        "Body Weight": [
-          { name: "Chin-ups", url: "https://exrx.net/AnimatedEx/LatissimusDorsi/Chinup.gif", muscles: ["Back", "Biceps"] },
-          { name: "Close Grip Chin-ups", url: "https://exrx.net/AnimatedEx/Biceps/CloseChinup.gif", muscles: ["Biceps"] },
-          { name: "Towel Chin-ups", url: "https://exrx.net/AnimatedEx/Biceps/TowelChinup.gif", muscles: ["Biceps"] },
-          { name: "L-Sit Chin-ups", url: "https://exrx.net/AnimatedEx/Biceps/LSitChinup.gif", muscles: ["Biceps"] },
-          { name: "Archer Chin-ups", url: "https://exrx.net/AnimatedEx/Biceps/ArcherChinup.gif", muscles: ["Biceps"] }
-        ],
-        "Plates": [
-          { name: "Plate Curl", url: "https://exrx.net/AnimatedEx/Biceps/PlateCurl.gif", muscles: ["Biceps"] },
-          { name: "Plate Pinch Curl", url: "https://exrx.net/AnimatedEx/Biceps/PlatePinchCurl.gif", muscles: ["Biceps"] },
-          { name: "Plate Hammer Curl", url: "https://exrx.net/AnimatedEx/Biceps/PlateHammerCurl.gif", muscles: ["Biceps"] },
-          { name: "Plate Reverse Curl", url: "https://exrx.net/AnimatedEx/Biceps/PlateReverseCurl.gif", muscles: ["Biceps"] },
-          { name: "Plate Concentration", url: "https://exrx.net/AnimatedEx/Biceps/PlateConc.gif", muscles: ["Biceps"] }
-        ],
-        "Bench": [
-          { name: "Preacher Curl", url: "https://exrx.net/AnimatedEx/Biceps/PreacherCurl.gif", muscles: ["Biceps"] },
-          { name: "Bench Scott Curl", url: "https://exrx.net/AnimatedEx/Biceps/ScottCurl.gif", muscles: ["Biceps"] },
-          { name: "Machine Bicep Curl", url: "https://exrx.net/AnimatedEx/Biceps/MachineCurl.gif", muscles: ["Biceps"] },
-          { name: "Seated Curl", url: "https://exrx.net/AnimatedEx/Biceps/SeatedCurl.gif", muscles: ["Biceps"] },
-          { name: "Decline Bench Curl", url: "https://exrx.net/AnimatedEx/Biceps/DeclineBenchCurl.gif", muscles: ["Biceps"] }
-        ],
-        "Machine": [
-          { name: "Cable Bicep Curl", url: "https://exrx.net/AnimatedEx/Biceps/CableCurl.gif", muscles: ["Biceps"] },
-          { name: "Cable Hammer Curl (Rope)", url: "https://exrx.net/AnimatedEx/Biceps/CableHammerCurl.gif", muscles: ["Biceps"] },
-          { name: "Pulley Machine Curl", url: "https://exrx.net/AnimatedEx/Biceps/PulleyMachineCurl.gif", muscles: ["Biceps"] },
-          { name: "Lever Curl Machine", url: "https://exrx.net/AnimatedEx/Biceps/LeverCurl.gif", muscles: ["Biceps"] },
-          { name: "Smith Machine Curl", url: "https://exrx.net/AnimatedEx/Biceps/SmithCurl.gif", muscles: ["Biceps"] }
-        ]
-      },
-      "Triceps": {
-        "Barbell": [
-          { name: "Close Grip Bench Press", url: "https://exrx.net/AnimatedEx/Triceps/BBCloseGrip.gif", muscles: ["Triceps", "Chest"] },
-          { name: "Barbell Skull Crushers", url: "https://exrx.net/AnimatedEx/Triceps/BBSkullCrusher.gif", muscles: ["Triceps"] },
-          { name: "Barbell JM Press", url: "https://exrx.net/AnimatedEx/Triceps/BBJMPress.gif", muscles: ["Triceps"] },
-          { name: "Barbell Reverse Grip Press", url: "https://exrx.net/AnimatedEx/Triceps/BBReverseGrip.gif", muscles: ["Triceps"] },
-          { name: "Barbell Tricep Press", url: "https://exrx.net/AnimatedEx/Triceps/BBTricepPress.gif", muscles: ["Triceps"] }
-        ],
-        "Dumbbell": [
-          { name: "Dumbbell Overhead Triceps Extension", url: "https://exrx.net/AnimatedEx/Triceps/DBOverheadExt.gif", muscles: ["Triceps"] },
-          { name: "Dumbbell One-Arm Tricep Kickback", url: "https://exrx.net/AnimatedEx/Triceps/DBTricepKickback.gif", muscles: ["Triceps"] },
-          { name: "Dumbbell Seated Tricep Press", url: "https://exrx.net/AnimatedEx/Triceps/DBSeatedPress.gif", muscles: ["Triceps"] },
-          { name: "Dumbbell Skullcrusher", url: "https://exrx.net/AnimatedEx/Triceps/DBSkullCrusher.gif", muscles: ["Triceps"] },
-          { name: "Dumbbell Tricep Dip", url: "https://exrx.net/AnimatedEx/Triceps/DBTricepDip.gif", muscles: ["Triceps"] }
-        ],
-        "Bands": [
-          { name: "Resistance Band Tricep Extension", url: "https://exrx.net/AnimatedEx/Triceps/BandTricepExt.gif", muscles: ["Triceps"] },
-          { name: "Band Overhead Tricep Press", url: "https://exrx.net/AnimatedEx/Triceps/BandOverheadPress.gif", muscles: ["Triceps"] },
-          { name: "Band Pushdown", url: "https://exrx.net/AnimatedEx/Triceps/BandPushdown.gif", muscles: ["Triceps"] },
-          { name: "Band Kickback", url: "https://exrx.net/AnimatedEx/Triceps/BandKickback.gif", muscles: ["Triceps"] },
-          { name: "Band Skull Crushers", url: "https://exrx.net/AnimatedEx/Triceps/BandSkullCrusher.gif", muscles: ["Triceps"] }
-        ],
-        "Body Weight": [
-          { name: "Tricep Dips", url: "https://exrx.net/AnimatedEx/Triceps/TriDip.gif", muscles: ["Triceps"] },
-          { name: "Bench Dips", url: "https://exrx.net/AnimatedEx/Triceps/BenchDip.gif", muscles: ["Triceps"] },
-          { name: "Diamond Push-ups", url: "https://exrx.net/AnimatedEx/Triceps/DiamondPushup.gif", muscles: ["Triceps"] },
-          { name: "Overhead Tricep Dips", url: "https://exrx.net/AnimatedEx/Triceps/OverheadDip.gif", muscles: ["Triceps"] },
-          { name: "Parallel Bar Dips", url: "https://exrx.net/AnimatedEx/Triceps/ParallelDip.gif", muscles: ["Triceps"] }
-        ],
-        "Plates": [
-          { name: "Plate Overhead Press", url: "https://exrx.net/AnimatedEx/Triceps/PlateOverheadPress.gif", muscles: ["Triceps"] },
-          { name: "Plate Skull Crusher", url: "https://exrx.net/AnimatedEx/Triceps/PlateSkullCrusher.gif", muscles: ["Triceps"] },
-          { name: "Plate Tricep Press", url: "https://exrx.net/AnimatedEx/Triceps/PlateTricepPress.gif", muscles: ["Triceps"] },
-          { name: "Plate Kickback", url: "https://exrx.net/AnimatedEx/Triceps/PlateKickback.gif", muscles: ["Triceps"] },
-          { name: "Plate Pushdown", url: "https://exrx.net/AnimatedEx/Triceps/PlatePushdown.gif", muscles: ["Triceps"] }
-        ],
-        "Bench": [
-          { name: "Cable Tricep Pushdown (Rope)", url: "https://exrx.net/AnimatedEx/Triceps/CablePushdown.gif", muscles: ["Triceps"] },
-          { name: "Cable Rope Overhead Tricep Ext", url: "https://exrx.net/AnimatedEx/Triceps/CableOverheadExt.gif", muscles: ["Triceps"] },
-          { name: "Cable Pushdown", url: "https://exrx.net/AnimatedEx/Triceps/CableRopePushdown.gif", muscles: ["Triceps"] },
-          { name: "Machine Tricep Extension", url: "https://exrx.net/AnimatedEx/Triceps/MachineTricepExt.gif", muscles: ["Triceps"] },
-          { name: "Machine Tricep Dips", url: "https://exrx.net/AnimatedEx/Triceps/MachineTricepDip.gif", muscles: ["Triceps"] }
-        ],
-        "Machine": [
-          { name: "Tricep Press Machine", url: "https://exrx.net/AnimatedEx/Triceps/MachineTricepPress.gif", muscles: ["Triceps"] },
-          { name: "Lever Tricep Extension", url: "https://exrx.net/AnimatedEx/Triceps/LeverTricep.gif", muscles: ["Triceps"] },
-          { name: "Smith Machine Tricep Dip", url: "https://exrx.net/AnimatedEx/Triceps/SmithMachineDip.gif", muscles: ["Triceps"] },
-          { name: "Pulley Machine Tricep", url: "https://exrx.net/AnimatedEx/Triceps/PulleyMachineTricep.gif", muscles: ["Triceps"] },
-          { name: "Tricep Rope Machine", url: "https://exrx.net/AnimatedEx/Triceps/TricepRopeMachine.gif", muscles: ["Triceps"] }
-        ]
-      },
-      "Legs": {
-        "Barbell": [
-          { name: "Barbell Squat", url: "https://exrx.net/AnimatedEx/Quadriceps/BBSquat.gif", muscles: ["Legs"] },
-          { name: "Barbell Deadlift", url: "https://exrx.net/AnimatedEx/Hamstrings/BBDeadlift.gif", muscles: ["Legs"] },
-          { name: "Barbell Front Squat", url: "https://exrx.net/AnimatedEx/Quadriceps/BBFrontSquat.gif", muscles: ["Legs"] },
-          { name: "Barbell Hack Squat", url: "https://exrx.net/AnimatedEx/Quadriceps/BBHackSquat.gif", muscles: ["Legs"] },
-          { name: "Barbell Leg Press", url: "https://exrx.net/AnimatedEx/Quadriceps/BBLegPress.gif", muscles: ["Legs"] }
-        ],
-        "Dumbbell": [
-          { name: "Dumbbell Bulgarian Split Squat", url: "https://exrx.net/AnimatedEx/Quadriceps/DBBulgarianSplit.gif", muscles: ["Legs"] },
-          { name: "Dumbbell Romanian Deadlift", url: "https://exrx.net/AnimatedEx/Hamstrings/DBRomanianDeadlift.gif", muscles: ["Legs"] },
-          { name: "Dumbbell Goblet Squat", url: "https://exrx.net/AnimatedEx/Quadriceps/DBGobletSquat.gif", muscles: ["Legs"] },
-          { name: "Dumbbell Lunge", url: "https://exrx.net/AnimatedEx/Quadriceps/DBLunge.gif", muscles: ["Legs"] },
-          { name: "Dumbbell Step-up", url: "https://exrx.net/AnimatedEx/Quadriceps/DBStepup.gif", muscles: ["Legs"] }
-        ],
-        "Bands": [
-          { name: "Resistance Band Squat", url: "https://exrx.net/AnimatedEx/Quadriceps/BandSquat.gif", muscles: ["Legs"] },
-          { name: "Band Deadlift", url: "https://exrx.net/AnimatedEx/Hamstrings/BandDeadlift.gif", muscles: ["Legs"] },
-          { name: "Band Leg Press", url: "https://exrx.net/AnimatedEx/Quadriceps/BandLegPress.gif", muscles: ["Legs"] },
-          { name: "Band Leg Extension", url: "https://exrx.net/AnimatedEx/Quadriceps/BandLegExt.gif", muscles: ["Legs"] },
-          { name: "Band Leg Curl", url: "https://exrx.net/AnimatedEx/Hamstrings/BandLegCurl.gif", muscles: ["Legs"] }
-        ],
-        "Body Weight": [
-          { name: "Bodyweight Squat", url: "https://exrx.net/AnimatedEx/Quadriceps/BWSquat.gif", muscles: ["Legs"] },
-          { name: "Lunge", url: "https://exrx.net/AnimatedEx/Quadriceps/Lunge.gif", muscles: ["Legs"] },
-          { name: "Step-up", url: "https://exrx.net/AnimatedEx/Quadriceps/Stepup.gif", muscles: ["Legs"] },
-          { name: "Glute Bridge", url: "https://exrx.net/AnimatedEx/Hamstrings/GluteBridge.gif", muscles: ["Legs"] },
-          { name: "Wall Sit", url: "https://exrx.net/AnimatedEx/Quadriceps/WallSit.gif", muscles: ["Legs"] }
-        ],
-        "Plates": [
-          { name: "Plate Loaded Squat", url: "https://exrx.net/AnimatedEx/Quadriceps/PlateSquat.gif", muscles: ["Legs"] },
-          { name: "Plate Loaded Leg Press", url: "https://exrx.net/AnimatedEx/Quadriceps/PlateLegPress.gif", muscles: ["Legs"] },
-          { name: "Plate Deadlift", url: "https://exrx.net/AnimatedEx/Hamstrings/PlateDeadlift.gif", muscles: ["Legs"] },
-          { name: "Plate Leg Curl", url: "https://exrx.net/AnimatedEx/Hamstrings/PlateLegCurl.gif", muscles: ["Legs"] },
-          { name: "Plate Leg Extension", url: "https://exrx.net/AnimatedEx/Quadriceps/PlateLegExt.gif", muscles: ["Legs"] }
-        ],
-        "Bench": [
-          { name: "Leg Press", url: "https://exrx.net/AnimatedEx/Quadriceps/LegPress.gif", muscles: ["Legs"] },
-          { name: "Smith Machine Squat", url: "https://exrx.net/AnimatedEx/Quadriceps/SmithSquat.gif", muscles: ["Legs"] },
-          { name: "Machine Leg Press", url: "https://exrx.net/AnimatedEx/Quadriceps/MachineLegPress.gif", muscles: ["Legs"] },
-          { name: "Hack Squat Machine", url: "https://exrx.net/AnimatedEx/Quadriceps/HackSquat.gif", muscles: ["Legs"] },
-          { name: "Belt Squat", url: "https://exrx.net/AnimatedEx/Quadriceps/BeltSquat.gif", muscles: ["Legs"] }
-        ],
-        "Machine": [
-          { name: "Machine Leg Extension", url: "https://exrx.net/AnimatedEx/Quadriceps/LegExtensionMachine.gif", muscles: ["Legs"] },
-          { name: "Leg Extension Machine", url: "https://exrx.net/AnimatedEx/Quadriceps/LegExt.gif", muscles: ["Legs"] },
-          { name: "Hamstring Curl Machine", url: "https://exrx.net/AnimatedEx/Hamstrings/LegCurlMachine.gif", muscles: ["Legs"] },
-          { name: "Calf Raise Machine", url: "https://exrx.net/AnimatedEx/Calves/CalfRaiseMachine.gif", muscles: ["Legs"] },
-          { name: "Leg Curl Machine", url: "https://exrx.net/AnimatedEx/Hamstrings/LegCurl.gif", muscles: ["Legs"] }
-        ]
-      },
-      "Shoulders": {
-        "Barbell": [
-          { name: "Barbell Military Press", url: "https://exrx.net/AnimatedEx/DeltoidAnterior/BBMilitaryPress.gif", muscles: ["Shoulders"] },
-          { name: "Barbell Push Press", url: "https://exrx.net/AnimatedEx/DeltoidAnterior/BBPushPress.gif", muscles: ["Shoulders"] },
-          { name: "Barbell Upright Row", url: "https://exrx.net/AnimatedEx/DeltoidLateral/BBUprightRow.gif", muscles: ["Shoulders"] },
-          { name: "Barbell Shrug", url: "https://exrx.net/AnimatedEx/Traps/BBShrug.gif", muscles: ["Shoulders"] },
-          { name: "Barbell Front Raise", url: "https://exrx.net/AnimatedEx/DeltoidAnterior/BBFrontRaise.gif", muscles: ["Shoulders"] }
-        ],
-        "Dumbbell": [
-          { name: "Dumbbell Shoulder Press", url: "https://exrx.net/AnimatedEx/DeltoidAnterior/DBShoulderPress.gif", muscles: ["Shoulders"] },
-          { name: "Dumbbell Lateral Raise", url: "https://exrx.net/AnimatedEx/DeltoidLateral/DBLateralRaise.gif", muscles: ["Shoulders"] },
-          { name: "Dumbbell Rear Delt Fly", url: "https://exrx.net/AnimatedEx/DeltoidPosterior/DBRearDeltFly.gif", muscles: ["Shoulders"] },
-          { name: "Dumbbell Front Raise", url: "https://exrx.net/AnimatedEx/DeltoidAnterior/DBFrontRaise.gif", muscles: ["Shoulders"] },
-          { name: "Dumbbell Shrug", url: "https://exrx.net/AnimatedEx/Traps/DBShrug.gif", muscles: ["Shoulders"] }
-        ],
-        "Bands": [
-          { name: "Resistance Band Shoulder Press", url: "https://exrx.net/AnimatedEx/DeltoidAnterior/BandShoulderPress.gif", muscles: ["Shoulders"] },
-          { name: "Band Lateral Raise", url: "https://exrx.net/AnimatedEx/DeltoidLateral/BandLateralRaise.gif", muscles: ["Shoulders"] },
-          { name: "Band Rear Delt Fly", url: "https://exrx.net/AnimatedEx/DeltoidPosterior/BandRearDeltFly.gif", muscles: ["Shoulders"] },
-          { name: "Band Front Raise", url: "https://exrx.net/AnimatedEx/DeltoidAnterior/BandFrontRaise.gif", muscles: ["Shoulders"] },
-          { name: "Band Shrug", url: "https://exrx.net/AnimatedEx/Traps/BandShrug.gif", muscles: ["Shoulders"] }
-        ],
-        "Body Weight": [
-          { name: "Handstand Hold", url: "https://exrx.net/AnimatedEx/Shoulders/HandstandHold.gif", muscles: ["Shoulders"] },
-          { name: "Pike Push-ups", url: "https://exrx.net/AnimatedEx/DeltoidAnterior/PikePushup.gif", muscles: ["Shoulders"] },
-          { name: "Wall Push-ups", url: "https://exrx.net/AnimatedEx/Shoulders/WallPushup.gif", muscles: ["Shoulders"] },
-          { name: "Shoulder Shrug", url: "https://exrx.net/AnimatedEx/Traps/ShoulderShrug.gif", muscles: ["Shoulders"] },
-          { name: "Bear Hold", url: "https://exrx.net/AnimatedEx/Shoulders/BearHold.gif", muscles: ["Shoulders"] }
-        ],
-        "Plates": [
-          { name: "Plate Press", url: "https://exrx.net/AnimatedEx/DeltoidAnterior/PlatePress.gif", muscles: ["Shoulders"] },
-          { name: "Plate Lateral Raise", url: "https://exrx.net/AnimatedEx/DeltoidLateral/PlateLateralRaise.gif", muscles: ["Shoulders"] },
-          { name: "Plate Front Raise", url: "https://exrx.net/AnimatedEx/DeltoidAnterior/PlateFrontRaise.gif", muscles: ["Shoulders"] },
-          { name: "Plate Shrug", url: "https://exrx.net/AnimatedEx/Traps/PlateShrug.gif", muscles: ["Shoulders"] },
-          { name: "Plate Raise", url: "https://exrx.net/AnimatedEx/DeltoidAnterior/PlateRaise.gif", muscles: ["Shoulders"] }
-        ],
-        "Bench": [
-          { name: "Machine Shoulder Press", url: "https://exrx.net/AnimatedEx/DeltoidAnterior/MachineShoulderPress.gif", muscles: ["Shoulders"] },
-          { name: "Smith Machine Shoulder Press", url: "https://exrx.net/AnimatedEx/DeltoidAnterior/SmithShoulderPress.gif", muscles: ["Shoulders"] },
-          { name: "Seated Shoulder Press", url: "https://exrx.net/AnimatedEx/DeltoidAnterior/SeatedShoulderPress.gif", muscles: ["Shoulders"] },
-          { name: "Machine Lateral Raise", url: "https://exrx.net/AnimatedEx/DeltoidLateral/MachineLateralRaise.gif", muscles: ["Shoulders"] },
-          { name: "Bench Shoulder Exercise", url: "https://exrx.net/AnimatedEx/Shoulders/BenchShoulder.gif", muscles: ["Shoulders"] }
-        ],
-        "Machine": [
-          { name: "Cable Lateral Raise", url: "https://exrx.net/AnimatedEx/DeltoidLateral/CableLateralRaise.gif", muscles: ["Shoulders"] },
-          { name: "Cable Rear Delt Fly", url: "https://exrx.net/AnimatedEx/DeltoidPosterior/CableRearDeltFly.gif", muscles: ["Shoulders"] },
-          { name: "Machine Shoulder Fly", url: "https://exrx.net/AnimatedEx/Shoulders/MachineShoulderFly.gif", muscles: ["Shoulders"] },
-          { name: "Pulley Shoulder Press", url: "https://exrx.net/AnimatedEx/DeltoidAnterior/PulleyShoulderPress.gif", muscles: ["Shoulders"] },
-          { name: "Lever Shoulder Machine", url: "https://exrx.net/AnimatedEx/Shoulders/LeverShoulder.gif", muscles: ["Shoulders"] }
-        ]
-      },
-      "Abs": {
-        "Barbell": [
-          { name: "Barbell Ab Rollout", url: "https://exrx.net/AnimatedEx/Rectus/AbRollout.gif", muscles: ["Abs"] },
-          { name: "Barbell Landmine Rotation", url: "https://exrx.net/AnimatedEx/Rectus/LandmineRotation.gif", muscles: ["Abs"] },
-          { name: "Barbell Weighted Crunch", url: "https://exrx.net/AnimatedEx/Rectus/BBWeightedCrunch.gif", muscles: ["Abs"] },
-          { name: "Barbell Floor Twist", url: "https://exrx.net/AnimatedEx/Rectus/BBFloorTwist.gif", muscles: ["Abs"] },
-          { name: "Landmine Abs", url: "https://exrx.net/AnimatedEx/Rectus/LandmineAbs.gif", muscles: ["Abs"] }
-        ],
-        "Dumbbell": [
-          { name: "Dumbbell Wood Chop", url: "https://exrx.net/AnimatedEx/Rectus/DBWoodChop.gif", muscles: ["Abs"] },
-          { name: "Dumbbell Weighted Crunch", url: "https://exrx.net/AnimatedEx/Rectus/DBWeightedCrunch.gif", muscles: ["Abs"] },
-          { name: "Dumbbell Side Bend", url: "https://exrx.net/AnimatedEx/Obliques/DBSideBend.gif", muscles: ["Abs"] },
-          { name: "Dumbbell Russian Twist", url: "https://exrx.net/AnimatedEx/Obliques/DBRussianTwist.gif", muscles: ["Abs"] },
-          { name: "Dumbbell V-up", url: "https://exrx.net/AnimatedEx/Rectus/DBVup.gif", muscles: ["Abs"] }
-        ],
-        "Bands": [
-          { name: "Resistance Band Crunch", url: "https://exrx.net/AnimatedEx/Rectus/BandCrunch.gif", muscles: ["Abs"] },
-          { name: "Band Pallof Press", url: "https://exrx.net/AnimatedEx/Obliques/BandPallofPress.gif", muscles: ["Abs"] },
-          { name: "Band Ab Rotation", url: "https://exrx.net/AnimatedEx/Obliques/BandAbRotation.gif", muscles: ["Abs"] },
-          { name: "Band Oblique Crunch", url: "https://exrx.net/AnimatedEx/Obliques/BandObliqueCrunch.gif", muscles: ["Abs"] },
-          { name: "Band Woodchop", url: "https://exrx.net/AnimatedEx/Rectus/BandWoodchop.gif", muscles: ["Abs"] }
-        ],
-        "Body Weight": [
-          { name: "Crunches", url: "https://exrx.net/AnimatedEx/Rectus/Crunch.gif", muscles: ["Abs"] },
-          { name: "Sit-ups", url: "https://exrx.net/AnimatedEx/Rectus/Situp.gif", muscles: ["Abs"] },
-          { name: "Hanging Leg Raise", url: "https://exrx.net/AnimatedEx/Rectus/HangingLegRaise.gif", muscles: ["Abs"] },
-          { name: "Plank", url: "https://exrx.net/AnimatedEx/Rectus/Plank.gif", muscles: ["Abs"] },
-          { name: "Bicycle Crunches", url: "https://exrx.net/AnimatedEx/Rectus/BicycleCrunch.gif", muscles: ["Abs"] }
-        ],
-        "Plates": [
-          { name: "Plate Weighted Crunch", url: "https://exrx.net/AnimatedEx/Rectus/PlateWeightedCrunch.gif", muscles: ["Abs"] },
-          { name: "Plate Russian Twist", url: "https://exrx.net/AnimatedEx/Obliques/PlateRussianTwist.gif", muscles: ["Abs"] },
-          { name: "Plate Oblique Crunch", url: "https://exrx.net/AnimatedEx/Obliques/PlateObliqueCrunch.gif", muscles: ["Abs"] },
-          { name: "Plate Hold", url: "https://exrx.net/AnimatedEx/Rectus/PlateHold.gif", muscles: ["Abs"] },
-          { name: "Plate Raise", url: "https://exrx.net/AnimatedEx/Rectus/PlateRaise.gif", muscles: ["Abs"] }
-        ],
-        "Bench": [
-          { name: "Cable Kneeling Crunch (Rope)", url: "https://exrx.net/AnimatedEx/Rectus/CableKneelingCrunch.gif", muscles: ["Abs"] },
-          { name: "Cable Pallof Press with Rotation", url: "https://exrx.net/AnimatedEx/Obliques/CablePallofRotation.gif", muscles: ["Abs"] },
-          { name: "Weighted Crunch", url: "https://exrx.net/AnimatedEx/Rectus/WeightedCrunch.gif", muscles: ["Abs"] },
-          { name: "Weighted Trunk Rotation", url: "https://exrx.net/AnimatedEx/Obliques/WeightedRotation.gif", muscles: ["Abs"] },
-          { name: "Bench Ab Crunch", url: "https://exrx.net/AnimatedEx/Rectus/BenchAbCrunch.gif", muscles: ["Abs"] }
-        ],
-        "Machine": [
-          { name: "Cable Crunch", url: "https://exrx.net/AnimatedEx/Rectus/CableCrunch.gif", muscles: ["Abs"] },
-          { name: "Machine Ab Crunch", url: "https://exrx.net/AnimatedEx/Rectus/MachineAbCrunch.gif", muscles: ["Abs"] },
-          { name: "Ab Machine", url: "https://exrx.net/AnimatedEx/Rectus/AbMachine.gif", muscles: ["Abs"] },
-          { name: "Oblique Machine", url: "https://exrx.net/AnimatedEx/Obliques/ObliqueMachine.gif", muscles: ["Abs"] },
-          { name: "Core Machine", url: "https://exrx.net/AnimatedEx/Rectus/CoreMachine.gif", muscles: ["Abs"] }
-        ]
-      }
-    };
-
-    // ========== INITIALIZATION ==========
-    (function checkSaturdayReset() {
-      const now = new Date();
-      const currentDayOfWeek = now.getDay();
-      const currentDateString = now.toDateString();
-      const lastResetDate = localStorage.getItem('last_saturday_reset');
-
-      if (currentDayOfWeek === 6 && lastResetDate !== currentDateString) {
-        localStorage.removeItem('current_workout_inputs');
-        localStorage.setItem('last_saturday_reset', currentDateString);
-      }
-    })();
-
-    // ========== STORAGE FUNCTIONS ==========
-    function getRoutines() {
-      return JSON.parse(localStorage.getItem('workout_routines') || '{}');
-    }
-
-    function saveRoutines(routines) {
-      localStorage.setItem('workout_routines', JSON.stringify(routines));
-    }
-
-    function getMeasurements() {
-      return JSON.parse(localStorage.getItem('athlete_measurements') || '[]');
-    }
-
-    function saveMeasurementsData(data) {
-      localStorage.setItem('athlete_measurements', JSON.stringify(data));
-    }
-
-    // ========== GET MUSCLE GROUPS FROM EXERCISES ==========
-    function getMusclesFromExercises(exercises) {
-      const muscles = new Set();
-      exercises.forEach(ex => {
-        EXERCISE_DATABASE[Object.keys(EXERCISE_DATABASE)[0]];
-        Object.values(EXERCISE_DATABASE).forEach(muscleGroup => {
-          Object.values(muscleGroup).forEach(equipmentExercises => {
-            const found = equipmentExercises.find(e => e.name === ex.name);
-            if (found && found.muscles) {
-              found.muscles.forEach(m => muscles.add(m));
-            }
-          });
-        });
+  dr.supersets.forEach((ss, si) => {
+    const section = document.createElement('div');
+    section.className = 'superset-section';
+    
+    let muscles = '';
+    if (ss.exercises && ss.exercises.length > 0) {
+      const muscleSet = new Set();
+      ss.exercises.forEach(ex => {
+        if (ex.name === 'Barbell Bench Press' || ex.name === 'Push-ups') muscleSet.add('Chest');
+        if (ex.name.includes('Row') || ex.name.includes('Pull')) muscleSet.add('Back');
+        if (ex.name.includes('Curl')) muscleSet.add('Biceps');
+        if (ex.name.includes('Dip') || ex.name.includes('Crusher')) muscleSet.add('Triceps');
+        if (ex.name.includes('Squat') || ex.name.includes('Deadlift') || ex.name.includes('Lunge')) muscleSet.add('Legs');
+        if (ex.name.includes('Press') && !ex.name.includes('Bench')) muscleSet.add('Shoulders');
+        if (ex.name.includes('Crunch') || ex.name.includes('Plank')) muscleSet.add('Abs');
       });
-      return Array.from(muscles).join(", ");
+      muscles = Array.from(muscleSet).join(', ');
     }
-
-    // ========== UPDATE DISPLAY WITH MUSCLE GROUPS ==========
-    function updateScheduleDisplay() {
-      const routines = getRoutines();
-      ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'].forEach(day => {
-        const dayRoutine = routines[day];
-        let muscles = '';
-        if (dayRoutine && dayRoutine.supersets) {
-          const muscleSet = new Set();
-          dayRoutine.supersets.forEach(ss => {
-            if (ss.muscles) {
-              ss.muscles.split(", ").forEach(m => muscleSet.add(m));
-            }
-          });
-          muscles = Array.from(muscleSet).join(" • ");
-        }
-        document.getElementById(`muscles-${day}`).innerText = muscles;
-      });
-    }
-
-    // ========== NAVIGATION ==========
-    setTimeout(() => {
-      document.getElementById('splash-screen').classList.remove('active');
-      document.getElementById('schedule-screen').classList.add('active');
-      updateScheduleDisplay();
-    }, 2500);
-
-    function openDay(day) {
-      document.getElementById('routine-day-title').innerText = day.toUpperCase();
-      const routines = getRoutines();
-      const dayRoutine = routines[day];
-      if (dayRoutine) {
-        document.getElementById('routine-split-title').innerText = dayRoutine.title || '';
-      }
-      document.getElementById('schedule-screen').classList.remove('active');
-      document.getElementById('routine-screen').classList.add('active');
-      renderRoutine(day);
-    }
-
-    function openMeasurements() {
-      document.getElementById('schedule-screen').classList.remove('active');
-      document.getElementById('measurements-screen').classList.add('active');
-      loadMeasurementsUI();
-    }
-
-    function goBackToSchedule() {
-      document.getElementById('routine-screen').classList.remove('active');
-      document.getElementById('measurements-screen').classList.remove('active');
-      document.getElementById('schedule-screen').classList.add('active');
-      updateScheduleDisplay();
-    }
-
-    // ========== MEASUREMENTS ==========
-    function saveMeasurement() {
-      const measurements = getMeasurements();
-      const today = new Date().toISOString().split('T')[0];
-
-      const newEntry = {
-        date: today,
-        weight: parseFloat(document.getElementById('weight-input').value) || null,
-        bicep: parseFloat(document.getElementById('bicep-input').value) || null,
-        chest: parseFloat(document.getElementById('chest-input').value) || null,
-        waist: parseFloat(document.getElementById('waist-input').value) || null,
-        thigh: parseFloat(document.getElementById('thigh-input').value) || null,
-        bodyfat: parseFloat(document.getElementById('bodyfat-input').value) || null,
-      };
-
-      const index = measurements.findIndex(m => m.date === today);
-      if (index > -1) {
-        measurements[index] = newEntry;
-      } else {
-        measurements.push(newEntry);
-      }
-
-      saveMeasurementsData(measurements);
-      alert('Measurement saved!');
-      loadMeasurementsUI();
-    }
-
-    function loadMeasurementsUI() {
-      const measurements = getMeasurements();
+    
+    const title = document.createElement('div');
+    title.className = 'superset-title-block';
+    title.innerHTML = '<div class="superset-header">' + ss.title + '</div><div style="font-size:0.75rem;color:#999;text-transform:uppercase;margin-top:4px">' + muscles + '</div><div style="font-size:0.75rem;color:#aaa">' + ss.details + '</div>';
+    section.appendChild(title);
+    
+    const rs = ss.restTime || 60;
+    
+    for (let i = 1; i <= ss.sets; i++) {
+      const setBlock = document.createElement('div');
+      setBlock.className = 'set-block';
+      setBlock.innerHTML = '<div class="set-label">SET ' + i + '</div>';
       
-      document.getElementById('weight-input').value = '';
-      document.getElementById('bicep-input').value = '';
-      document.getElementById('chest-input').value = '';
-      document.getElementById('waist-input').value = '';
-      document.getElementById('thigh-input').value = '';
-      document.getElementById('bodyfat-input').value = '';
-
-      const today = new Date().toISOString().split('T')[0];
-      const today_data = measurements.find(m => m.date === today);
-      if (today_data) {
-        if (today_data.weight) document.getElementById('weight-input').value = today_data.weight;
-        if (today_data.bicep) document.getElementById('bicep-input').value = today_data.bicep;
-        if (today_data.chest) document.getElementById('chest-input').value = today_data.chest;
-        if (today_data.waist) document.getElementById('waist-input').value = today_data.waist;
-        if (today_data.thigh) document.getElementById('thigh-input').value = today_data.thigh;
-        if (today_data.bodyfat) document.getElementById('bodyfat-input').value = today_data.bodyfat;
-      }
-
-      const chartsContainer = document.getElementById('charts-container');
-      chartsContainer.innerHTML = '';
-
-      if (measurements.length === 0) {
-        chartsContainer.innerHTML = '<div style="color: #666; text-align: center; padding: 20px;">No measurements yet. Add one to see progress!</div>';
-        return;
-      }
-
-      if (measurements.some(m => m.weight)) {
-        chartsContainer.innerHTML += createChart('Weight (lbs)', measurements, 'weight');
-      }
-      if (measurements.some(m => m.bicep)) {
-        chartsContainer.innerHTML += createChart('Bicep (in)', measurements, 'bicep');
-      }
-      if (measurements.some(m => m.chest)) {
-        chartsContainer.innerHTML += createChart('Chest (in)', measurements, 'chest');
-      }
-      if (measurements.some(m => m.waist)) {
-        chartsContainer.innerHTML += createChart('Waist (in)', measurements, 'waist');
-      }
-      if (measurements.some(m => m.thigh)) {
-        chartsContainer.innerHTML += createChart('Thigh (in)', measurements, 'thigh');
-      }
-      if (measurements.some(m => m.bodyfat)) {
-        chartsContainer.innerHTML += createChart('Body Fat (%)', measurements, 'bodyfat');
-      }
-
-      setTimeout(() => {
-        const canvases = chartsContainer.querySelectorAll('canvas');
-        canvases.forEach((canvas) => {
-          if (canvas && !canvas.chart) {
-            initChart(canvas);
-          }
-        });
-      }, 100);
-    }
-
-    function createChart(title, measurements, field) {
-      return `<div class="chart-container"><div class="chart-title">${title}</div><canvas id="chart-${field}"></canvas></div>`;
-    }
-
-    function initChart(canvas) {
-      const field = canvas.id.replace('chart-', '');
-      const measurements = getMeasurements();
-      const labels = measurements.map(m => new Date(m.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
-      const data = measurements.map(m => m[field]);
-
-      const ctx = canvas.getContext('2d');
-      new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: labels,
-          datasets: [{
-            label: field,
-            data: data,
-            borderColor: '#FF6600',
-            backgroundColor: 'rgba(255, 102, 0, 0.1)',
-            borderWidth: 2,
-            fill: true,
-            pointRadius: 4,
-            pointBackgroundColor: '#FF6600',
-            pointBorderColor: '#000',
-            pointBorderWidth: 2,
-            tension: 0.3
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false }
-          },
-          scales: {
-            y: {
-              beginAtZero: false,
-              grid: { color: 'rgba(255, 102, 0, 0.1)' },
-              ticks: { color: '#FF6600' }
-            },
-            x: {
-              grid: { color: 'rgba(255, 102, 0, 0.05)' },
-              ticks: { color: '#FF6600' }
-            }
-          }
-        }
+      ss.exercises.forEach((ex) => {
+        const row = document.createElement('div');
+        row.className = 'exercise-row';
+        row.innerHTML = '<img src="' + ex.url + '" class="exercise-thumb" onerror="this.src=\'https://via.placeholder.com/50/FF6600/FF6600\'"/><div class="exercise-name">' + ex.name + '</div><div class="exercise-inputs"><div style="display:flex;flex-direction:column"><span class="input-label">Lbs</span><input type="number" placeholder="0"></div><div style="display:flex;flex-direction:column"><span class="input-label">Reps</span><input type="number" placeholder="0"></div></div>';
+        setBlock.appendChild(row);
       });
-      canvas.chart = true;
-    }
-
-    // ========== RENDER ROUTINE ==========
-    function renderRoutine(day) {
-      const container = document.getElementById('supersets-list');
-      container.innerHTML = '';
-
-      const routines = getRoutines();
-      const dayRoutine = routines[day];
-      const prData = JSON.parse(localStorage.getItem('athlete_prs') || '{}');
-      const savedInputs = JSON.parse(localStorage.getItem('current_workout_inputs') || '{}');
-
-      if (!dayRoutine || !dayRoutine.supersets) {
-        container.innerHTML = `<div style="text-align:center; margin-top: 30px; color: #666;">No routine configured for ${day} yet.</div>`;
-        return;
-      }
-
-      let html = '';
-
-      dayRoutine.supersets.forEach((superset, sIndex) => {
-        html += `
-          <div class="superset-section">
-            <div class="superset-title-block">
-              <div class="superset-header">${superset.title}</div>
-              ${superset.muscles ? `<div class="superset-muscles">${superset.muscles}</div>` : ''}
-              <div class="superset-details">${superset.details}</div>
-            </div>
-        `;
-
-        const restSeconds = superset.restTime || 60;
-        let restBtnText = "REST 60s";
-        if (restSeconds === 30) restBtnText = "REST 30s";
-        if (restSeconds === 90) restBtnText = "REST 90s";
-
-        for (let i = 1; i <= superset.sets; i++) {
-          const specificSetNote = superset.setSpecifics && superset.setSpecifics[i-1] ? `<span class="burnout-details">${superset.setSpecifics[i-1]}</span>` : '';
-
-          html += `<div class="set-block">
-                    <div class="set-label">
-                      <span>SET ${i}</span>
-                      ${specificSetNote}
-                    </div>`;
-
-          superset.exercises.forEach((ex, eIndex) => {
-            const exPr = prData[ex.name] || { weight: 0, reps: 0 };
-            const inputKeyBase = `${day}_s${sIndex}_set${i}_ex${eIndex}_`;
-            const savedW = savedInputs[inputKeyBase + 'w'] !== undefined ? savedInputs[inputKeyBase + 'w'] : '';
-            const savedR = savedInputs[inputKeyBase + 'r'] !== undefined ? savedInputs[inputKeyBase + 'r'] : '';
-
-            html += `
-              <div class="exercise-row">
-                <img src="${ex.url}" alt="${ex.name}" class="exercise-thumb" onerror="this.src='https://via.placeholder.com/50/FF6600/FF6600?text=GIF'" />
-                <div class="exercise-info">
-                  <div class="exercise-name" data-ex-name="${ex.name}">${ex.name}</div>
-                </div>
-                <div class="exercise-inputs">
-                  <div class="input-group">
-                    <span class="input-label">Lbs</span>
-                    <input type="number" class="weight-input" data-key="${inputKeyBase}w" inputmode="decimal" value="${savedW}" placeholder="${exPr.weight || '0'}" oninput="saveCurrentInputs()">
-                  </div>
-                  <div class="input-group">
-                    <span class="input-label">Reps</span>
-                    <input type="number" class="rep-input" data-key="${inputKeyBase}r" inputmode="numeric" value="${savedR}" placeholder="${exPr.reps || '0'}" oninput="saveCurrentInputs()">
-                  </div>
-                </div>
-              </div>
-            `;
-          });
-
-          html += `<button class="rest-btn" onclick="startRestTimer(this, ${restSeconds})">${restBtnText}</button>`;
-          html += `</div>`;
-        }
-
-        if (superset.burnout && superset.burnoutExerciseIndex !== undefined) {
-          const targetEx = superset.exercises[superset.burnoutExerciseIndex];
-
-          html += `
-            <div class="set-block">
-              <div class="set-label">BURNOUT <span class="burnout-details">${superset.burnoutText}</span></div>
-
-              <div class="exercise-row">
-                <img src="${targetEx.url}" alt="${targetEx.name}" class="exercise-thumb" onerror="this.src='https://via.placeholder.com/50/FF6600/FF6600?text=GIF'" />
-                <div class="exercise-info">
-                  <div class="exercise-name">${targetEx.name}</div>
-                </div>
-
-                <div class="completion-group">
-                  <span class="input-label">DONE?</span>
-                  <div class="yes-no-btns">
-                    <button class="yn-btn yes-btn" onclick="markBurnout(this, 'yes')">YES</button>
-                    <button class="yn-btn no-btn" onclick="markBurnout(this, 'no')">NO</button>
-                  </div>
-                </div>
-              </div>
-
-              <div class="raise-weight-note">RAISE WEIGHT NEXT WEEK</div>
-              <button class="rest-btn" onclick="startRestTimer(this, ${restSeconds})">${restBtnText}</button>
-            </div>
-          `;
-        }
-
-        html += `</div>`;
-      });
-
-      html += `<div class="complete-btn-container"><button class="complete-btn" onclick="completeWorkout()">COMPLETE</button></div>`;
-
-      container.innerHTML = html;
-    }
-
-    function saveCurrentInputs() {
-      const savedInputs = {};
-      document.querySelectorAll('.weight-input, .rep-input').forEach(input => {
-        const key = input.getAttribute('data-key');
-        if (key && input.value !== '') {
-          savedInputs[key] = input.value;
-        }
-      });
-      localStorage.setItem('current_workout_inputs', JSON.stringify(savedInputs));
-    }
-
-    function markBurnout(btn, answer) {
-      const parentBlock = btn.closest('.set-block');
-      const yesBtn = parentBlock.querySelector('.yes-btn');
-      const noBtn = parentBlock.querySelector('.no-btn');
-      const note = parentBlock.querySelector('.raise-weight-note');
-
-      yesBtn.classList.remove('yes-selected');
-      noBtn.classList.remove('no-selected');
-      note.style.display = 'none';
-
-      if (answer === 'yes') {
-        yesBtn.classList.add('yes-selected');
-        note.style.display = 'block';
-      } else {
-        noBtn.classList.add('no-selected');
-      }
-    }
-
-    function completeWorkout() {
-      const prData = JSON.parse(localStorage.getItem('athlete_prs') || '{}');
-      const allRows = document.querySelectorAll('.exercise-row');
-
-      allRows.forEach(row => {
-        const nameEl = row.querySelector('.exercise-name');
-        const wInput = row.querySelector('.weight-input');
-        const rInput = row.querySelector('.rep-input');
-
-        if (nameEl && wInput && rInput) {
-          const name = nameEl.getAttribute('data-ex-name');
-          const weight = parseFloat(wInput.value) || 0;
-          const reps = parseInt(rInput.value) || 0;
-
-          if (weight > 0 || reps > 0) {
-            if (!prData[name]) {
-              prData[name] = { weight: 0, reps: 0 };
-            }
-
-            if (weight > prData[name].weight || (weight === prData[name].weight && reps > prData[name].reps)) {
-              prData[name] = { weight: weight, reps: reps };
-            }
-          }
-        }
-      });
-
-      localStorage.setItem('athlete_prs', JSON.stringify(prData));
-      alert("Workout Completed! PRs saved.");
-      goBackToSchedule();
-    }
-
-    function startRestTimer(btnElement, totalSeconds) {
-      if (btnElement.dataset.running === "true") return;
-
-      btnElement.dataset.running = "true";
-      btnElement.classList.add("active-timer");
-
-      let timeLeft = totalSeconds || 60;
-      btnElement.innerText = `RESTING: ${timeLeft}s`;
-
-      const timerInterval = setInterval(() => {
-        timeLeft--;
-
-        if (timeLeft <= 0) {
-          clearInterval(timerInterval);
-          btnElement.innerText = "REST COMPLETE";
-          btnElement.classList.remove("active-timer");
-        } else {
-          btnElement.innerText = `RESTING: ${timeLeft}s`;
-        }
-      }, 1000);
-    }
-
-    // ========== ADMIN PANEL ==========
-    function toggleAdmin() {
-      const adminScreen = document.getElementById('admin-screen');
-      if (adminScreen.classList.contains('active')) {
-        closeAdmin();
-      } else {
-        adminScreen.classList.add('active');
-      }
-    }
-
-    function closeAdmin() {
-      document.getElementById('admin-screen').classList.remove('active');
-    }
-
-    function switchAdminTab(tab) {
-      document.querySelectorAll('.admin-tab-btn').forEach(btn => btn.classList.remove('active'));
-      document.querySelectorAll('.admin-panel').forEach(panel => panel.classList.remove('active'));
-
-      event.target.classList.add('active');
-      document.getElementById('admin-' + tab).classList.add('active');
-    }
-
-    function loadDayForEdit() {
-      const day = document.getElementById('admin-day-select').value;
-      if (!day) return;
-
-      const routines = getRoutines();
-      const dayRoutine = routines[day] || { title: '', supersets: [] };
-
-      let html = '';
-
-      if (!dayRoutine.supersets || dayRoutine.supersets.length === 0) {
-        html = '<p style="color: #666; text-align: center; margin: 20px 0;">No supersets yet. Add one below.</p>';
-      } else {
-        dayRoutine.supersets.forEach((superset, idx) => {
-          html += renderSupersetConfig(superset, idx);
-        });
-      }
-
-      document.getElementById('supersets-config-container').innerHTML = html;
-    }
-
-    function renderSupersetConfig(superset, index) {
-      const exercisesList = superset.exercises.map(ex => `<div class="exercise-tag">${ex.name} <button type="button" onclick="removeExercise(${index}, '${ex.name.replace(/'/g, "\\'")}')">✕</button></div>`).join('');
-
-      return `
-        <div class="superset-config">
-          <input type="text" class="config-input" placeholder="Superset Title" value="${superset.title}" onchange="updateSuperset(${index}, 'title', this.value)">
-          <input type="text" class="config-input" placeholder="Details (e.g., 8-10 reps. 60 sec rest)" value="${superset.details}" onchange="updateSuperset(${index}, 'details', this.value)">
-
-          <label style="color: #000; font-size: 0.85rem; font-weight: 600;">Number of Sets:</label>
-          <input type="number" class="config-input" min="1" max="10" value="${superset.sets}" onchange="updateSuperset(${index}, 'sets', parseInt(this.value))">
-
-          <label style="color: #000; font-size: 0.85rem; font-weight: 600;">Rest Time (seconds):</label>
-          <input type="number" class="config-input" value="${superset.restTime || 60}" onchange="updateSuperset(${index}, 'restTime', parseInt(this.value))">
-
-          <label style="color: #000; font-size: 0.85rem; font-weight: 600;">Muscle Group:</label>
-          <select class="config-input" onchange="updateMuscleGroup(${index}, this.value)">
-            <option value="">-- Select Muscle --</option>
-            <option value="Chest" ${superset.muscleGroup === 'Chest' ? 'selected' : ''}>Chest</option>
-            <option value="Back" ${superset.muscleGroup === 'Back' ? 'selected' : ''}>Back</option>
-            <option value="Biceps" ${superset.muscleGroup === 'Biceps' ? 'selected' : ''}>Biceps</option>
-            <option value="Triceps" ${superset.muscleGroup === 'Triceps' ? 'selected' : ''}>Triceps</option>
-            <option value="Legs" ${superset.muscleGroup === 'Legs' ? 'selected' : ''}>Legs</option>
-            <option value="Shoulders" ${superset.muscleGroup === 'Shoulders' ? 'selected' : ''}>Shoulders</option>
-            <option value="Abs" ${superset.muscleGroup === 'Abs' ? 'selected' : ''}>Abs</option>
-          </select>
-
-          <label style="color: #000; font-size: 0.85rem; font-weight: 600;">Equipment:</label>
-          <select class="config-input" onchange="updateEquipment(${index}, this.value)">
-            <option value="">-- Select Equipment --</option>
-            ${superset.muscleGroup ? Object.keys(EXERCISE_DATABASE[superset.muscleGroup] || {}).map(eq => `<option value="${eq}" ${superset.equipment === eq ? 'selected' : ''}>${eq}</option>`).join('') : ''}
-          </select>
-
-          <label style="color: #000; font-size: 0.85rem; font-weight: 600;">Exercise:</label>
-          <select class="config-input" onchange="addExerciseToSuperset(${index}, this.value)" id="exercise-select-${index}">
-            <option value="">-- Select Exercise --</option>
-            ${superset.muscleGroup && superset.equipment ? (EXERCISE_DATABASE[superset.muscleGroup][superset.equipment] || []).map(ex => `<option value="${ex.name}|${ex.url}">${ex.name}</option>`).join('') : ''}
-          </select>
-
-          <div class="selected-exercises">${exercisesList}</div>
-
-          <label style="color: #000; font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 8px;">
-            <input type="checkbox" ${superset.burnout ? 'checked' : ''} onchange="updateSuperset(${index}, 'burnout', this.checked)">
-            Has Burnout Set
-          </label>
-
-          ${superset.burnout && superset.exercises.length > 0 ? `
-            <label style="color: #000; font-size: 0.85rem; font-weight: 600;">Which exercise is the burnout?</label>
-            <select class="config-input" onchange="updateSuperset(${index}, 'burnoutExerciseIndex', parseInt(this.value))">
-              ${superset.exercises.map((ex, i) => `<option value="${i}" ${superset.burnoutExerciseIndex === i ? 'selected' : ''}>${ex.name}</option>`).join('')}
-            </select>
-            <input type="text" class="config-input" placeholder="Burnout Instructions" value="${superset.burnoutText || ''}" onchange="updateSuperset(${index}, 'burnoutText', this.value)">
-          ` : ''}
-
-          <button class="admin-btn" style="margin-top: 10px; background: #999;" onclick="removeSuperset(${index})">Remove</button>
-        </div>
-      `;
-    }
-
-    function updateMuscleGroup(index, muscleGroup) {
-      const routines = getRoutines();
-      const day = document.getElementById('admin-day-select').value;
-      routines[day].supersets[index].muscleGroup = muscleGroup;
-      routines[day].supersets[index].equipment = '';
-      routines[day].supersets[index].exercises = [];
-      saveRoutines(routines);
-      loadDayForEdit();
-    }
-
-    function updateEquipment(index, equipment) {
-      const routines = getRoutines();
-      const day = document.getElementById('admin-day-select').value;
-      routines[day].supersets[index].equipment = equipment;
-      saveRoutines(routines);
-      loadDayForEdit();
-    }
-
-    function addExerciseToSuperset(index, exerciseData) {
-      if (!exerciseData) return;
-      const [name, url] = exerciseData.split('|');
-      const routines = getRoutines();
-      const day = document.getElementById('admin-day-select').value;
-      const superset = routines[day].supersets[index];
-
-      if (!superset.exercises.some(ex => ex.name === name)) {
-        superset.exercises.push({ name: name, url: url });
-        
-        // Auto-populate muscles
-        superset.muscles = getMusclesFromExercises(superset.exercises);
-        
-        saveRoutines(routines);
-        loadDayForEdit();
-      }
-      document.getElementById(`exercise-select-${index}`).value = '';
-    }
-
-    function removeExercise(supersetIndex, exerciseName) {
-      const routines = getRoutines();
-      const day = document.getElementById('admin-day-select').value;
-      const superset = routines[day].supersets[supersetIndex];
-      superset.exercises = superset.exercises.filter(ex => ex.name !== exerciseName);
       
-      // Update muscles
-      superset.muscles = getMusclesFromExercises(superset.exercises);
+      const restBtn = document.createElement('button');
+      restBtn.className = 'rest-btn';
+      restBtn.innerText = 'REST ' + rs + 's';
+      restBtn.onclick = function() { startRestTimer(this, rs); };
+      setBlock.appendChild(restBtn);
       
-      saveRoutines(routines);
-      loadDayForEdit();
+      section.appendChild(setBlock);
     }
+    
+    c.appendChild(section);
+  });
+}
 
-    function updateSuperset(index, field, value) {
-      const routines = getRoutines();
-      const day = document.getElementById('admin-day-select').value;
-      if (!routines[day]) routines[day] = { title: '', supersets: [] };
-      routines[day].supersets[index][field] = value;
-      saveRoutines(routines);
-      if (field === 'burnout' && !value) {
-        routines[day].supersets[index].burnoutExerciseIndex = 0;
-        routines[day].supersets[index].burnoutText = '';
-        saveRoutines(routines);
-        loadDayForEdit();
-      }
+function startRestTimer(btn, seconds) {
+  if (btn.dataset.running === 'true') return;
+  btn.dataset.running = 'true';
+  btn.classList.add('active-timer');
+  
+  let remaining = seconds;
+  btn.innerText = 'RESTING: ' + remaining + 's';
+  
+  const timer = setInterval(() => {
+    remaining--;
+    if (remaining <= 0) {
+      clearInterval(timer);
+      btn.innerText = 'REST COMPLETE';
+      btn.classList.remove('active-timer');
+      try {
+        const a = new(window.AudioContext || window.webkitAudioContext)();
+        const o = a.createOscillator();
+        const g = a.createGain();
+        o.connect(g);
+        g.connect(a.destination);
+        o.frequency.value = 800;
+        g.gain.setValueAtTime(0.3, a.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.01, a.currentTime + 0.1);
+        o.start(a.currentTime);
+        o.stop(a.currentTime + 0.1);
+      } catch(e) {}
+    } else {
+      btn.innerText = 'RESTING: ' + remaining + 's';
     }
+  }, 1000);
+}
 
-    function addNewSuperset() {
-      const routines = getRoutines();
-      const day = document.getElementById('admin-day-select').value;
-      if (!day) {
-        alert('Please select a day first');
-        return;
-      }
-      if (!routines[day]) {
-        routines[day] = { title: '', supersets: [] };
-      }
+function completeWorkout() {
+  alert('Workout Complete!');
+  const dt = new Date().toISOString().split('T')[0];
+  const c = JSON.parse(localStorage.getItem('completed_workouts') || '{}');
+  c[dt] = currentDay;
+  localStorage.setItem('completed_workouts', JSON.stringify(c));
+  goHome();
+}
 
-      routines[day].supersets.push({
-        title: '',
-        details: '',
-        sets: 3,
-        restTime: 60,
-        exercises: [],
-        muscleGroup: '',
-        equipment: '',
-        muscles: '',
-        burnout: false,
-        burnoutExerciseIndex: 0,
-        burnoutText: ''
-      });
+function goToMeasurements() {
+  showScreen('measurements-screen');
+}
 
-      saveRoutines(routines);
-      loadDayForEdit();
-    }
+function saveMeasurements() {
+  alert('Saved!');
+}
 
-    function removeSuperset(index) {
-      const routines = getRoutines();
-      const day = document.getElementById('admin-day-select').value;
-      routines[day].supersets.splice(index, 1);
-      saveRoutines(routines);
-      loadDayForEdit();
-    }
+function goToCalculator() {
+  showScreen('calculator-screen');
+}
 
-    function saveDayRoutine() {
-      const day = document.getElementById('admin-day-select').value;
-      if (!day) {
-        alert('Please select a day');
-        return;
-      }
-      const routines = getRoutines();
-      if (!routines[day].title) {
-        routines[day].title = '';
-      }
-      saveRoutines(routines);
-      updateScheduleDisplay();
-      alert(`${day} routine saved!`);
-    }
+function calculateORM() {
+  const w = parseFloat(document.getElementById('orm-weight').value);
+  const r = parseInt(document.getElementById('orm-reps').value);
+  if (!w || !r) {
+    alert('Enter weight and reps');
+    return;
+  }
+  const orm = w * (36 / (37 - r));
+  document.getElementById('orm-result').innerHTML = '<div class="orm-result">1RM: ' + orm.toFixed(1) + ' lbs</div>';
+}
 
-    // ========== EXPORT/IMPORT ==========
-    function exportRoutines() {
-      const routines = getRoutines();
-      const dataStr = JSON.stringify(routines, null, 2);
-      const dataBlob = new Blob([dataStr], { type: 'application/json' });
-      const url = URL.createObjectURL(dataBlob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `routines-${new Date().toISOString().split('T')[0]}.json`;
-      link.click();
-    }
+function goToCalendar() {
+  showScreen('calendar-screen');
+  renderCalendar();
+}
 
-    function importRoutines() {
-      document.getElementById('import-file').click();
-    }
+function renderCalendar() {
+  const c = document.getElementById('calendar-grid');
+  const m = document.getElementById('calendar-month');
+  const cw = new Date();
+  const today = cw.getDate();
+  m.innerText = cw.toLocaleDateString('en-US', {month:'long', year:'numeric'});
+  
+  const fd = new Date(cw.getFullYear(), cw.getMonth(), 1).getDay();
+  const ld = new Date(cw.getFullYear(), cw.getMonth()+1, 0).getDate();
+  
+  let h = '';
+  const dns = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  dns.forEach(d => h += '<div class="calendar-day" style="font-weight:900;color:#666">' + d + '</div>');
+  for (let i = 0; i < fd; i++) h += '<div class="calendar-day"></div>';
+  for (let i = 1; i <= ld; i++) {
+    const isToday = (i === today) ? ' today' : '';
+    h += '<div class="calendar-day' + isToday + '">' + i + '</div>';
+  }
+  
+  c.innerHTML = h;
+}
 
-    document.getElementById('import-file').addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
+function goToDashboard() {
+  showScreen('dashboard-screen');
+  const c = document.getElementById('dashboard-content');
+  let h = '<div class="dashboard-stat"><div class="dashboard-stat-label">Total Volume</div><div class="dashboard-stat-value">0 lbs</div></div>';
+  h += '<div class="dashboard-stat"><div class="dashboard-stat-label">Workouts</div><div class="dashboard-stat-value">0</div></div>';
+  c.innerHTML = h;
+}
 
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        try {
-          const imported = JSON.parse(event.target.result);
-          saveRoutines(imported);
-          alert('Routines imported!');
-          loadDayForEdit();
-          updateScheduleDisplay();
-        } catch (err) {
-          alert('Invalid file');
-        }
-      };
-      reader.readAsText(file);
+function toggleAdmin() {
+  const a = document.getElementById('admin-screen');
+  if (a.classList.contains('active')) {
+    closeAdmin();
+  } else {
+    a.classList.add('active');
+  }
+}
+
+function closeAdmin() {
+  document.getElementById('admin-screen').classList.remove('active');
+}
+
+function switchAdminTab(t) {
+  document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.admin-panel').forEach(p => p.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('admin-' + t).classList.add('active');
+}
+
+function loadDayForEdit() {
+  const d = document.getElementById('admin-day-select').value;
+  if (!d) return;
+  const r = getRoutines();
+  const dr = r[d] || {supersets: []};
+  
+  let html = '';
+  if (dr.supersets.length === 0) {
+    html = '<p style="color:#666;text-align:center">No supersets</p>';
+  } else {
+    dr.supersets.forEach((ss, idx) => {
+      html += '<div class="superset-config">';
+      html += '<input type="text" class="config-input" placeholder="Title" value="' + ss.title + '">';
+      html += '<input type="text" class="config-input" placeholder="Details" value="' + ss.details + '">';
+      html += '<label style="color:#000;font-size:0.85rem;font-weight:600">Sets:</label>';
+      html += '<input type="number" class="config-input" min="1" max="10" value="' + ss.sets + '">';
+      html += '<label style="color:#000;font-size:0.85rem;font-weight:600;display:block;margin-top:8px">Rest (sec):</label>';
+      html += '<select class="rest-selector"><option value="10">10s</option><option value="20">20s</option><option value="30">30s</option><option value="45">45s</option><option value="60" selected>60s</option><option value="75">75s</option><option value="90">90s</option><option value="120">120s</option></select>';
+      html += '<label style="color:#000;font-size:0.85rem;font-weight:600;display:block;margin-top:10px">Muscle Group:</label>';
+      html += '<select class="flow-dropdown" id="mg-' + idx + '" onchange="updateMuscleFlow(' + idx + ')"><option>--Choose--</option><option value="Chest">Chest</option><option value="Back">Back</option><option value="Biceps">Biceps</option><option value="Triceps">Triceps</option><option value="Legs">Legs</option><option value="Shoulders">Shoulders</option><option value="Abs">Abs</option></select>';
+      html += '<label style="color:#000;font-size:0.85rem;font-weight:600;display:block;margin-top:8px">Equipment:</label>';
+      html += '<select class="flow-dropdown" id="eq-' + idx + '" onchange="updateEquipmentFlow(' + idx + ')" style="display:none"><option>--Choose--</option></select>';
+      html += '<label style="color:#000;font-size:0.85rem;font-weight:600;display:block;margin-top:8px">Exercise:</label>';
+      html += '<select class="flow-dropdown" id="ex-' + idx + '" onchange="selectExerciseFlow(' + idx + ')" style="display:none"><option>--Choose--</option></select>';
+      html += '<div id="selected-' + idx + '" style="margin-top:10px"></div>';
+      html += '<button class="admin-btn" style="margin-top:10px" onclick="removeSuperset(' + idx + ')">Remove</button>';
+      html += '</div>';
     });
+  }
+  
+  document.getElementById('supersets-config-container').innerHTML = html;
+}
 
-    function exportPRs() {
-      const prs = JSON.parse(localStorage.getItem('athlete_prs') || '{}');
-      const dataStr = JSON.stringify(prs, null, 2);
-      const dataBlob = new Blob([dataStr], { type: 'application/json' });
-      const url = URL.createObjectURL(dataBlob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `prs-${new Date().toISOString().split('T')[0]}.json`;
-      link.click();
-    }
+function addNewSuperset() {
+  const d = document.getElementById('admin-day-select').value;
+  if (!d) {
+    alert('Select day first');
+    return;
+  }
+  const r = getRoutines();
+  if (!r[d]) r[d] = {supersets: []};
+  r[d].supersets.push({title: '', details: '', sets: 3, restTime: 60, exercises: []});
+  saveRoutines(r);
+  loadDayForEdit();
+}
 
-    function clearPRs() {
-      if (confirm('Clear all PRs?')) {
-        localStorage.removeItem('athlete_prs');
-        alert('PRs cleared!');
-      }
-    }
+function removeSuperset(i) {
+  const d = document.getElementById('admin-day-select').value;
+  const r = getRoutines();
+  r[d].supersets.splice(i, 1);
+  saveRoutines(r);
+  loadDayForEdit();
+}
 
-    function exportMeasurements() {
-      const data = getMeasurements();
-      const dataStr = JSON.stringify(data, null, 2);
-      const dataBlob = new Blob([dataStr], { type: 'application/json' });
-      const url = URL.createObjectURL(dataBlob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `measurements-${new Date().toISOString().split('T')[0]}.json`;
-      link.click();
-    }
+const MUSCLES = {Chest:{Barbell:[{name:"Barbell Bench Press",url:"https://exrx.net/AnimatedEx/Chest/BBBench.gif"},{name:"Incline Bench Press",url:"https://exrx.net/AnimatedEx/Chest/BBInclineBench.gif"},{name:"Decline Bench Press",url:"https://exrx.net/AnimatedEx/Chest/BBDeclineBench.gif"},{name:"Close Grip Bench",url:"https://exrx.net/AnimatedEx/Chest/BBCloseGripBench.gif"},{name:"Pause Bench Press",url:"https://exrx.net/AnimatedEx/Chest/BBBench.gif"}],Dumbbell:[{name:"Dumbbell Bench Press",url:"https://exrx.net/AnimatedEx/Chest/DBBench.gif"},{name:"Dumbbell Incline",url:"https://exrx.net/AnimatedEx/Chest/DBInclineBench.gif"},{name:"Dumbbell Decline",url:"https://exrx.net/AnimatedEx/Chest/DBDeclineBench.gif"},{name:"Dumbbell Pullovers",url:"https://exrx.net/AnimatedEx/Chest/DBPullover.gif"},{name:"Single Arm DB Press",url:"https://exrx.net/AnimatedEx/Chest/DBBench.gif"}],"Body Weight":[{name:"Push-ups",url:"https://exrx.net/AnimatedEx/Chest/Pushup.gif"},{name:"Diamond Push-ups",url:"https://exrx.net/AnimatedEx/Chest/DiamondPushup.gif"},{name:"Decline Push-ups",url:"https://exrx.net/AnimatedEx/Chest/DeclinePushup.gif"},{name:"Wide Grip Push-ups",url:"https://exrx.net/AnimatedEx/Chest/WideGripPushup.gif"},{name:"Archer Push-ups",url:"https://exrx.net/AnimatedEx/Chest/ArcherPushup.gif"}]},Back:{Barbell:[{name:"Bent-Over Row",url:"https://exrx.net/AnimatedEx/LatissimusDorsi/BBBentOverRow.gif"},{name:"Deadlift",url:"https://exrx.net/AnimatedEx/Back/BBDeadlift.gif"},{name:"Pendulum Row",url:"https://exrx.net/AnimatedEx/LatissimusDorsi/BBBentOverRow.gif"},{name:"T-Bar Row",url:"https://exrx.net/AnimatedEx/LatissimusDorsi/TBarRow.gif"},{name:"Yates Row",url:"https://exrx.net/AnimatedEx/LatissimusDorsi/YatesRow.gif"}],Dumbbell:[{name:"One-Arm Row",url:"https://exrx.net/AnimatedEx/LatissimusDorsi/DBOneArmRow.gif"},{name:"Pullovers",url:"https://exrx.net/AnimatedEx/LatissimusDorsi/DBPullover.gif"},{name:"Seal Row",url:"https://exrx.net/AnimatedEx/LatissimusDorsi/DBBentOverRow.gif"},{name:"Decline Bench Row",url:"https://exrx.net/AnimatedEx/LatissimusDorsi/DBRow.gif"},{name:"Incline Row",url:"https://exrx.net/AnimatedEx/LatissimusDorsi/DBRow.gif"}],"Body Weight":[{name:"Pull-ups",url:"https://exrx.net/AnimatedEx/LatissimusDorsi/Pullup.gif"},{name:"Chin-ups",url:"https://exrx.net/AnimatedEx/LatissimusDorsi/Chinup.gif"},{name:"Neutral Grip Pull-ups",url:"https://exrx.net/AnimatedEx/LatissimusDorsi/NeutralGripPullup.gif"},{name:"Wide Grip Pull-ups",url:"https://exrx.net/AnimatedEx/LatissimusDorsi/WideGripPullup.gif"},{name:"Archer Pull-ups",url:"https://exrx.net/AnimatedEx/LatissimusDorsi/ArcherPullup.gif"}]},Biceps:{Barbell:[{name:"Barbell Curl",url:"https://exrx.net/AnimatedEx/Biceps/BBCurl.gif"},{name:"EZ Bar Curl",url:"https://exrx.net/AnimatedEx/Biceps/EZBarCurl.gif"},{name:"Close Grip Curl",url:"https://exrx.net/AnimatedEx/Biceps/CloseGripCurl.gif"},{name:"Wide Grip Curl",url:"https://exrx.net/AnimatedEx/Biceps/WideGripCurl.gif"},{name:"Pause Curl",url:"https://exrx.net/AnimatedEx/Biceps/BBCurl.gif"}],Dumbbell:[{name:"Alternating Curl",url:"https://exrx.net/AnimatedEx/Biceps/DBAltCurl.gif"},{name:"Hammer Curl",url:"https://exrx.net/AnimatedEx/Biceps/DBHammerCurl.gif"},{name:"Concentration Curl",url:"https://exrx.net/AnimatedEx/Biceps/DBConcentrationCurl.gif"},{name:"Incline Curl",url:"https://exrx.net/AnimatedEx/Biceps/DBInclineCurl.gif"},{name:"Drag Curl",url:"https://exrx.net/AnimatedEx/Biceps/DBDragCurl.gif"}],"Body Weight":[{name:"Chin-ups",url:"https://exrx.net/AnimatedEx/LatissimusDorsi/Chinup.gif"},{name:"Close Chin-ups",url:"https://exrx.net/AnimatedEx/Biceps/CloseChinup.gif"},{name:"Archer Chin-ups",url:"https://exrx.net/AnimatedEx/Biceps/ArcherChinup.gif"},{name:"L-Sit Chin-ups",url:"https://exrx.net/AnimatedEx/Biceps/LSitChinup.gif"},{name:"Typewriter Chin-ups",url:"https://exrx.net/AnimatedEx/Biceps/TypewriterChinup.gif"}]},Triceps:{Barbell:[{name:"Close Grip Bench",url:"https://exrx.net/AnimatedEx/Triceps/BBCloseGrip.gif"},{name:"Skull Crushers",url:"https://exrx.net/AnimatedEx/Triceps/BBSkullCrusher.gif"},{name:"Narrow Bench",url:"https://exrx.net/AnimatedEx/Triceps/NarrowBench.gif"},{name:"Board Press",url:"https://exrx.net/AnimatedEx/Triceps/BoardPress.gif"},{name:"Pause Skull Crusher",url:"https://exrx.net/AnimatedEx/Triceps/BBSkullCrusher.gif"}],Dumbbell:[{name:"Overhead Extension",url:"https://exrx.net/AnimatedEx/Triceps/DBOverheadExt.gif"},{name:"Tricep Kickback",url:"https://exrx.net/AnimatedEx/Triceps/DBTricepKickback.gif"},{name:"Decline Overhead",url:"https://exrx.net/AnimatedEx/Triceps/DBDeclineOverhead.gif"},{name:"Single Arm Overhead",url:"https://exrx.net/AnimatedEx/Triceps/DBOneArmOverhead.gif"},{name:"Lying Tricep Press",url:"https://exrx.net/AnimatedEx/Triceps/DBLyingPress.gif"}],"Body Weight":[{name:"Tricep Dips",url:"https://exrx.net/AnimatedEx/Triceps/TriDip.gif"},{name:"Bench Dips",url:"https://exrx.net/AnimatedEx/Triceps/BenchDip.gif"},{name:"Diamond Push-ups",url:"https://exrx.net/AnimatedEx/Chest/DiamondPushup.gif"},{name:"Decline Dips",url:"https://exrx.net/AnimatedEx/Triceps/DeclineDip.gif"},{name:"Ring Dips",url:"https://exrx.net/AnimatedEx/Triceps/RingDip.gif"}]},Legs:{Barbell:[{name:"Barbell Squat",url:"https://exrx.net/AnimatedEx/Quadriceps/BBSquat.gif"},{name:"Deadlift",url:"https://exrx.net/AnimatedEx/Hamstrings/BBDeadlift.gif"},{name:"Front Squat",url:"https://exrx.net/AnimatedEx/Quadriceps/BBFrontSquat.gif"},{name:"Leg Press",url:"https://exrx.net/AnimatedEx/Quadriceps/LegPress.gif"},{name:"Hack Squat",url:"https://exrx.net/AnimatedEx/Quadriceps/HackSquat.gif"}],Dumbbell:[{name:"Goblet Squat",url:"https://exrx.net/AnimatedEx/Quadriceps/DBGobletSquat.gif"},{name:"Dumbbell Lunge",url:"https://exrx.net/AnimatedEx/Quadriceps/DBLunge.gif"},{name:"Bulgarian Split Squat",url:"https://exrx.net/AnimatedEx/Quadriceps/BulgarianSplitSquat.gif"},{name:"DB Step-ups",url:"https://exrx.net/AnimatedEx/Quadriceps/DBStepUp.gif"},{name:"Pistol Squat",url:"https://exrx.net/AnimatedEx/Quadriceps/PistolSquat.gif"}],"Body Weight":[{name:"Bodyweight Squat",url:"https://exrx.net/AnimatedEx/Quadriceps/BWSquat.gif"},{name:"Bodyweight Lunge",url:"https://exrx.net/AnimatedEx/Quadriceps/Lunge.gif"},{name:"Step-ups",url:"https://exrx.net/AnimatedEx/Quadriceps/StepUp.gif"},{name:"Pistol Squat",url:"https://exrx.net/AnimatedEx/Quadriceps/PistolSquat.gif"},{name:"Jump Squat",url:"https://exrx.net/AnimatedEx/Quadriceps/JumpSquat.gif"}]},Shoulders:{Barbell:[{name:"Military Press",url:"https://exrx.net/AnimatedEx/DeltoidAnterior/BBMilitaryPress.gif"},{name:"Push Press",url:"https://exrx.net/AnimatedEx/DeltoidAnterior/BBPushPress.gif"},{name:"Strict Press",url:"https://exrx.net/AnimatedEx/DeltoidAnterior/StrictPress.gif"},{name:"Seated Military Press",url:"https://exrx.net/AnimatedEx/DeltoidAnterior/SeatedPress.gif"},{name:"Front Squat to Press",url:"https://exrx.net/AnimatedEx/DeltoidAnterior/FrontSquatPress.gif"}],Dumbbell:[{name:"Dumbbell Shoulder Press",url:"https://exrx.net/AnimatedEx/DeltoidAnterior/DBShoulderPress.gif"},{name:"Lateral Raise",url:"https://exrx.net/AnimatedEx/DeltoidLateral/DBLateralRaise.gif"},{name:"Rear Delt Flye",url:"https://exrx.net/AnimatedEx/DeltoidPosterior/DBRearFlye.gif"},{name:"Single Arm Press",url:"https://exrx.net/AnimatedEx/DeltoidAnterior/DBOneArmPress.gif"},{name:"Arnold Press",url:"https://exrx.net/AnimatedEx/DeltoidAnterior/ArnoldPress.gif"}],"Body Weight":[{name:"Pike Push-ups",url:"https://exrx.net/AnimatedEx/DeltoidAnterior/PikePushup.gif"},{name:"Handstand Hold",url:"https://exrx.net/AnimatedEx/Shoulders/HandstandHold.gif"},{name:"Wall Walk",url:"https://exrx.net/AnimatedEx/Shoulders/WallWalk.gif"},{name:"Pseudo Planche Lean",url:"https://exrx.net/AnimatedEx/Shoulders/PseudoPlancheLean.gif"},{name:"Handstand Push-ups",url:"https://exrx.net/AnimatedEx/Shoulders/HandstandPushup.gif"}]},Abs:{Barbell:[{name:"Weighted Ab Rollout",url:"https://exrx.net/AnimatedEx/Rectus/WeightedAbRollout.gif"},{name:"Weighted Crunch",url:"https://exrx.net/AnimatedEx/Rectus/BBWeightedCrunch.gif"},{name:"Weighted Sit-ups",url:"https://exrx.net/AnimatedEx/Rectus/WeightedSitup.gif"},{name:"Plate Hold",url:"https://exrx.net/AnimatedEx/Rectus/PlateHold.gif"},{name:"Cable Crunch",url:"https://exrx.net/AnimatedEx/Rectus/CableCrunch.gif"}],Dumbbell:[{name:"Dumbbell Wood Chop",url:"https://exrx.net/AnimatedEx/Rectus/DBWoodChop.gif"},{name:"Russian Twist",url:"https://exrx.net/AnimatedEx/Obliques/DBRussianTwist.gif"},{name:"DB Suitcase Carry",url:"https://exrx.net/AnimatedEx/Obliques/DBSuitcaseCarry.gif"},{name:"DB Sit-ups",url:"https://exrx.net/AnimatedEx/Rectus/DBSitup.gif"},{name:"DB Side Bend",url:"https://exrx.net/AnimatedEx/Obliques/DBSideBend.gif"}],"Body Weight":[{name:"Crunches",url:"https://exrx.net/AnimatedEx/Rectus/Crunch.gif"},{name:"Plank",url:"https://exrx.net/AnimatedEx/Rectus/Plank.gif"},{name:"Sit-ups",url:"https://exrx.net/AnimatedEx/Rectus/Situp.gif"},{name:"Leg Raises",url:"https://exrx.net/AnimatedEx/Rectus/LegRaise.gif"},{name:"Dragon Flag",url:"https://exrx.net/AnimatedEx/Rectus/DragonFlag.gif"}]}};
 
-    function clearMeasurements() {
-      if (confirm('Clear all measurements?')) {
-        localStorage.removeItem('athlete_measurements');
-        alert('Measurements cleared!');
-        loadMeasurementsUI();
-      }
-    }
+function updateMuscleFlow(idx) {
+  const mg = document.getElementById('mg-' + idx).value;
+  const eqSel = document.getElementById('eq-' + idx);
+  const exSel = document.getElementById('ex-' + idx);
+  if (mg !== '--Choose--') {
+    eqSel.style.display = 'block';
+    eqSel.innerHTML = '<option>--Choose--</option>';
+    Object.keys(MUSCLES[mg]).forEach(eq => {
+      eqSel.innerHTML += '<option value="' + eq + '">' + eq + '</option>';
+    });
+    exSel.style.display = 'none';
+  }
+}
 
-    function exportCurrentInputs() {
-      const inputs = JSON.parse(localStorage.getItem('current_workout_inputs') || '{}');
-      const dataStr = JSON.stringify(inputs, null, 2);
-      const dataBlob = new Blob([dataStr], { type: 'application/json' });
-      const url = URL.createObjectURL(dataBlob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `inputs-${new Date().toISOString().split('T')[0]}.json`;
-      link.click();
-    }
+function updateEquipmentFlow(idx) {
+  const mg = document.getElementById('mg-' + idx).value;
+  const eq = document.getElementById('eq-' + idx).value;
+  const exSel = document.getElementById('ex-' + idx);
+  if (eq !== '--Choose--') {
+    exSel.style.display = 'block';
+    exSel.innerHTML = '<option>--Choose--</option>';
+    MUSCLES[mg][eq].forEach(ex => {
+      exSel.innerHTML += '<option value="' + ex.name + '|' + ex.url + '">' + ex.name + '</option>';
+    });
+  }
+}
 
-    function clearCurrentInputs() {
-      if (confirm('Clear this week\'s inputs?')) {
-        localStorage.removeItem('current_workout_inputs');
-        alert('Inputs cleared!');
-      }
-    }
+function selectExerciseFlow(idx) {
+  const exVal = document.getElementById('ex-' + idx).value;
+  if (exVal === '--Choose--') return;
+  const parts = exVal.split('|');
+  const name = parts[0];
+  const url = parts[1];
+  const d = document.getElementById('admin-day-select').value;
+  const r = getRoutines();
+  const ss = r[d].supersets[idx];
+  if (!ss.exercises.find(e => e.name === name)) {
+    ss.exercises.push({name: name, url: url});
+    saveRoutines(r);
+    const selectedDiv = document.getElementById('selected-' + idx);
+    const tag = document.createElement('div');
+    tag.style.cssText = 'background:#FF6600;color:#000;padding:8px 12px;border-radius:8px;display:inline-block;margin-right:8px;font-size:0.8rem;font-weight:600';
+    tag.innerHTML = name + ' <button style="background:none;border:none;color:#000;cursor:pointer;font-weight:bold;margin-left:8px" onclick="this.parentElement.remove()">✕</button>';
+    selectedDiv.appendChild(tag);
+  }
+}
 
-    function clearAllData() {
-      if (confirm('Clear ALL routines?')) {
-        localStorage.removeItem('workout_routines');
-        alert('All routines cleared!');
-        loadDayForEdit();
-        updateScheduleDisplay();
-      }
+function saveDayRoutine() {
+  alert('Saved!');
+}
+
+function exportRoutines() {
+  const r = getRoutines();
+  const s = JSON.stringify(r, null, 2);
+  const b = new Blob([s], {type: 'application/json'});
+  const u = URL.createObjectURL(b);
+  const l = document.createElement('a');
+  l.href = u;
+  l.download = 'routines.json';
+  l.click();
+}
+
+function importRoutines() {
+  document.getElementById('import-file').click();
+}
+
+document.getElementById('import-file').addEventListener('change', (e) => {
+  const f = e.target.files[0];
+  if (!f) return;
+  const r = new FileReader();
+  r.onload = (evt) => {
+    try {
+      const imp = JSON.parse(evt.target.result);
+      saveRoutines(imp);
+      alert('Imported!');
+      loadDayForEdit();
+    } catch(err) {
+      alert('Invalid JSON');
     }
-  </script>
+  };
+  r.readAsText(f);
+});
+
+function clearAllData() {
+  if (confirm('Clear ALL data?')) {
+    localStorage.removeItem('workout_routines');
+    alert('Cleared!');
+  }
+}
+
+setTimeout(() => {
+  document.getElementById('splash-screen').classList.remove('active');
+  document.getElementById('home-screen').classList.add('active');
+}, 2500);
+</script>
 </body>
 </html>
